@@ -1223,23 +1223,22 @@
         /* ==================== Bottom Tab Bar ==================== */
         #bottomTabBar {
             position: fixed;
-            bottom: 0;
+            bottom: 12px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0;
-            width: calc(100% - 40px - var(--sal, 0px) - var(--sar, 0px));
-            max-width: 380px;
+            gap: 4px;
+            width: calc(100% - 48px - var(--sal, 0px) - var(--sar, 0px));
+            max-width: 360px;
             background: var(--tab-bar-bg);
             backdrop-filter: blur(24px) saturate(180%);
             -webkit-backdrop-filter: blur(24px) saturate(180%);
-            padding: 5px 4px;
-            padding-bottom: max(5px, env(safe-area-inset-bottom));
-            border-radius: 34px;
+            padding: 6px;
+            border-radius: 999px;
             border: 1px solid var(--border);
-            box-shadow: 0 2px 16px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.06);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.15), 0 0 0 0.5px rgba(0,0,0,0.08);
             z-index: 500;
             transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease;
             user-select: none;
@@ -1250,38 +1249,56 @@
             opacity: 0;
             pointer-events: none;
         }
+
+        /* 滑动指示器 */
+        .tab-indicator {
+            position: absolute;
+            top: 6px;
+            bottom: 6px;
+            border-radius: 999px;
+            background: var(--tab-active-bg);
+            transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            z-index: 0;
+        }
+
         .tab-item {
+            position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             flex: 1;
-            padding: 6px 6px;
-            min-height: 50px;
+            padding: 8px 12px;
+            min-height: 44px;
             border: none;
             background: transparent;
             color: var(--tab-inactive);
             font-size: 13px;
             font-weight: 500;
             cursor: pointer;
-            border-radius: 30px;
-            transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+            border-radius: 999px;
+            transition: color 0.3s cubic-bezier(0.4,0,0.2,1);
             -webkit-user-select: none;
             user-select: none;
             white-space: nowrap;
             gap: 2px;
             font-family: inherit;
+            z-index: 1;
         }
         .tab-item:active { transform: scale(0.94); }
         .tab-item.active {
             color: var(--tab-active-text);
-            background: var(--tab-active-bg);
         }
         .tab-item .tab-icon svg {
             display: block;
             width: 20px;
             height: 20px;
             fill: currentColor;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .tab-item.active .tab-icon svg {
+            transform: scale(1.1);
         }
         .tab-item .tab-label { font-size: 10px; line-height: 1.2; }
 
@@ -1598,6 +1615,7 @@
 
         <!-- ==================== Bottom Tab Bar ==================== -->
         <div id="bottomTabBar">
+            <div class="tab-indicator" id="tabIndicator"></div>
             <button class="tab-item active" data-tab="page-home" onclick="switchTab('page-home')">
                 <span class="tab-icon">
                     <svg viewBox="0 0 20 20"><path d="M10 1.5L1.5 8.5V18h6v-6h5v6h6V8.5L10 1.5z"/></svg>
@@ -1612,7 +1630,7 @@
             </button>
             <button class="tab-item" data-tab="page-settings" onclick="switchTab('page-settings')">
                 <span class="tab-icon">
-                    <svg viewBox="0 0 20 20"><path d="M17.5 11h-.8a6.6 6.6 0 01-.4 1l.6.6a1 1 0 010 1.4l-1.5 1.5a1 1 0 01-1.4 0l-.6-.6a6.6 6.6 0 01-1 .4v.8a1 1 0 01-1 1h-2a1 1 0 01-1-1v-.8a6.6 6.6 0 01-1-.4l-.6.6a1 1 0 01-1.4 0L2.5 15a1 1 0 010-1.4l.6-.6a6.6 6.6 0 01-.4-1h-.8a1 1 0 01-1-1V9a1 1 0 011-1h.8a6.6 6.6 0 01.4-1l-.6-.6a1 1 0 010-1.4L4 3.5a1 1 0 011.4 0l.6.6a6.6 6.6 0 011-.4v-.8a1 1 0 011-1h2a1 1 0 011 1v.8a6.6 6.6 0 011 .4l.6-.6a1 1 0 011.4 0l1.5 1.5a1 1 0 010 1.4l-.6.6a6.6 6.6 0 01.4 1h.8a1 1 0 011 1v2a1 1 0 01-1 1zM10 6a4 4 0 100 8 4 4 0 000-8z"/></svg>
+                    <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" fill="currentColor"/></svg>
                 </span>
                 <span class="tab-label">设置</span>
             </button>
@@ -1736,14 +1754,29 @@
             }
         }
 
+        function updateTabIndicator(activeTab) {
+            const indicator = document.getElementById('tabIndicator');
+            if (!indicator || !activeTab) return;
+            const bar = document.getElementById('bottomTabBar');
+            const barRect = bar.getBoundingClientRect();
+            const tabRect = activeTab.getBoundingClientRect();
+            indicator.style.left = (tabRect.left - barRect.left) + 'px';
+            indicator.style.width = tabRect.width + 'px';
+        }
+
         function switchTab(pageId) {
             // 不允许切换到考试页、提交页、报告页（通过 tab bar）
             if (pageId === 'page-exam' || pageId === 'page-submit' || pageId === 'page-report') return;
             showPage(pageId);
             // 更新 tab 高亮
+            let activeTab = null;
             document.querySelectorAll('.tab-item').forEach(t => {
-                t.classList.toggle('active', t.dataset.tab === pageId);
+                const isActive = t.dataset.tab === pageId;
+                t.classList.toggle('active', isActive);
+                if (isActive) activeTab = t;
             });
+            // 更新滑动指示器位置
+            requestAnimationFrame(() => updateTabIndicator(activeTab));
         }
 
         function hideTabBar() {
@@ -1756,9 +1789,14 @@
             const activePage = document.querySelector('.page.active');
             if (activePage) {
                 const id = activePage.id;
+                let activeTab = null;
                 document.querySelectorAll('.tab-item').forEach(t => {
-                    t.classList.toggle('active', t.dataset.tab === id);
+                    const isActive = t.dataset.tab === id;
+                    t.classList.toggle('active', isActive);
+                    if (isActive) activeTab = t;
                 });
+                // 更新滑动指示器位置
+                requestAnimationFrame(() => updateTabIndicator(activeTab));
             }
         }
 
@@ -2991,6 +3029,12 @@
 
             // 设置 PWA
             setupPWA();
+
+            // 初始化底栏指示器位置
+            setTimeout(() => {
+                const activeTab = document.querySelector('.tab-item.active');
+                if (activeTab) updateTabIndicator(activeTab);
+            }, 100);
         }
 
         // 页面可见性变化时保存进度（移动端切到后台时触发）
