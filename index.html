@@ -89,16 +89,16 @@
         }
 
         [data-theme="light"] {
-            --bg-page: #f4f2ed;
+            --bg-page: #ffffff;
             --bg-card: #ffffff;
-            --bg-subtle: #f8f7f4;
-            --bg-muted: #efede7;
+            --bg-subtle: #f6f6f6;
+            --bg-muted: #eeeeee;
             --text-primary: #1a1814;
             --text-secondary: #6b6658;
             --text-muted: #a09880;
             --text-heading: #0d0c09;
-            --border: #e0dcd2;
-            --border-light: #ebe7de;
+            --border: #e5e5e5;
+            --border-light: #eeeeee;
             --border-accent: rgba(180, 145, 65, 0.25);
             --shadow-card: 0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.05);
             --shadow-lg: 0 1px 2px rgba(0,0,0,0.05), 0 8px 24px rgba(0,0,0,0.08);
@@ -111,7 +111,7 @@
             --tab-active-bg: rgba(180,145,65,0.12);
             --bg-overlay: rgba(0,0,0,0.02);
         }
-        [data-theme="light"] body { background: #f4f2ed; }
+        [data-theme="light"] body { background: #ffffff; }
         [data-theme="light"] #app::after { opacity: 0.025; }
         [data-theme="light"] #bottomTabBar {
             box-shadow: 0 2px 16px rgba(0,0,0,0.08), 0 0 1px rgba(0,0,0,0.1);
@@ -715,6 +715,7 @@
             -webkit-overflow-scrolling: touch;
             animation: slide-up 0.3s cubic-bezier(0.4,0,0.2,1);
             border-top: 1px solid var(--border);
+            font-family: "Songti SC", "STSong", "SimSun", "Noto Serif SC", serif;
         }
         @keyframes slide-up {
             from { transform: translateY(100%); }
@@ -727,9 +728,8 @@
             margin-bottom: 20px;
         }
         .modal-header h3 {
-            font-family: "DM Serif Display", "Noto Serif SC", serif;
             font-size: 20px;
-            font-weight: 400;
+            font-weight: 600;
             color: var(--text-heading);
         }
         .modal-close {
@@ -757,7 +757,7 @@
             align-items: center;
             justify-content: center;
             border-radius: 10px;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.15s;
@@ -766,7 +766,6 @@
             color: var(--text-muted);
             -webkit-user-select: none;
             user-select: none;
-            font-family: "JetBrains Mono", monospace;
         }
         .answer-grid-item:active { transform: scale(0.9); }
         .answer-grid-item.answered {
@@ -1211,7 +1210,9 @@
         /* ==================== Bottom Tab Bar ==================== */
         #bottomTabBar {
             position: fixed;
-            bottom: env(safe-area-inset-bottom, 12px);
+            bottom: 0;
+            bottom: constant(safe-area-inset-bottom, 4px);
+            bottom: env(safe-area-inset-bottom, 4px);
             left: 50%;
             transform: translateX(-50%);
             display: flex;
@@ -1223,7 +1224,7 @@
             background: var(--tab-bar-bg);
             backdrop-filter: blur(24px) saturate(180%);
             -webkit-backdrop-filter: blur(24px) saturate(180%);
-            padding: 4px;
+            padding: 5px 4px;
             border-radius: 34px;
             border: 1px solid var(--border);
             box-shadow: 0 2px 12px rgba(0,0,0,0.25), 0 0 1px rgba(0,0,0,0.3);
@@ -1243,8 +1244,8 @@
             align-items: center;
             justify-content: center;
             flex: 1;
-            padding: 7px 8px;
-            min-height: 46px;
+            padding: 6px 6px;
+            min-height: 50px;
             border: none;
             background: transparent;
             color: var(--tab-inactive);
@@ -1256,7 +1257,7 @@
             -webkit-user-select: none;
             user-select: none;
             white-space: nowrap;
-            gap: 1px;
+            gap: 2px;
             font-family: inherit;
         }
         .tab-item:active { transform: scale(0.94); }
@@ -1266,8 +1267,8 @@
         }
         .tab-item .tab-icon svg {
             display: block;
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             fill: currentColor;
         }
         .tab-item .tab-label { font-size: 10px; line-height: 1.2; }
@@ -1363,8 +1364,8 @@
         #page-home {
             padding-top: calc(24px + constant(safe-area-inset-top, 0px));
             padding-top: calc(24px + env(safe-area-inset-top, 0px));
-            padding-bottom: calc(74px + constant(safe-area-inset-bottom, 0px));
-            padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+            padding-bottom: calc(72px + constant(safe-area-inset-bottom, 0px));
+            padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
         }
         #page-exam {
             padding-bottom: constant(safe-area-inset-bottom, 0px);
@@ -1385,8 +1386,8 @@
         #page-history {
             padding-top: calc(24px + constant(safe-area-inset-top, 0px));
             padding-top: calc(24px + env(safe-area-inset-top, 0px));
-            padding-bottom: calc(74px + constant(safe-area-inset-bottom, 0px));
-            padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+            padding-bottom: calc(72px + constant(safe-area-inset-bottom, 0px));
+            padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
         }
         .exam-header {
             padding-top: calc(12px + constant(safe-area-inset-top, 0px));
@@ -1399,8 +1400,8 @@
         #page-settings {
             padding-top: calc(24px + constant(safe-area-inset-top, 0px));
             padding-top: calc(24px + env(safe-area-inset-top, 0px));
-            padding-bottom: calc(74px + constant(safe-area-inset-bottom, 0px));
-            padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+            padding-bottom: calc(72px + constant(safe-area-inset-bottom, 0px));
+            padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
         }
     </style>
 </head>
