@@ -8,8 +8,8 @@
     <meta name="theme-color" content="#080c12">
     <title>考试计时器</title>
     <!-- iOS 主屏幕图标（通过内联 SVG data URI） -->
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='36' fill='%23080c12'/%3E%3Ctext x='90' y='126' text-anchor='middle' font-size='100' fill='%23c9a44b' font-family='serif'%3E考%3C/text%3E%3C/svg%3E">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23080c12'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-size='18' fill='%23c9a44b' font-family='serif'%3E考%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='36' fill='%23080c12'/%3E%3Ctext x='90' y='126' text-anchor='middle' font-size='100' fill='%233b6db5' font-family='serif'%3E考%3C/text%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23080c12'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-size='18' fill='%233b6db5' font-family='serif'%3E考%3C/text%3E%3C/svg%3E">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&display=swap');
 
@@ -64,7 +64,7 @@
             --text-heading: #f0ebe0;
             --border: #1e2532;
             --border-light: #181e29;
-            --border-accent: rgba(201, 164, 75, 0.2);
+            --border-accent: rgba(59, 109, 181, 0.2);
             --shadow-card: 0 1px 2px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.3);
             --shadow-lg: 0 1px 2px rgba(0,0,0,0.5), 0 8px 32px rgba(0,0,0,0.5);
             --shadow-glow: 0 0 40px rgba(201, 164, 75, 0.08);
@@ -72,12 +72,12 @@
             --header-text: #e8e3d7;
             --tab-bar-bg: rgba(8,12,18,0.92);
             --tab-inactive: rgba(255,255,255,0.42);
-            --tab-active-text: #d4b35c;
-            --tab-active-bg: rgba(201,164,75,0.12);
-            --accent: #c9a44b;
-            --accent-dim: #8b7340;
-            --accent-glow: rgba(201, 164, 75, 0.12);
-            --accent-text: #d4b35c;
+            --tab-active-text: #7aafdb;
+            --tab-active-bg: rgba(59,109,181,0.15);
+            --accent: #3b6db5;
+            --accent-dim: #2a4d7a;
+            --accent-glow: rgba(59, 109, 181, 0.12);
+            --accent-text: #7aafdb;
             --blue: #6b9aca;
             --blue-dim: #3d5a7a;
             --green: #5a9e8f;
@@ -99,7 +99,7 @@
             --text-heading: #0d0c09;
             --border: #e5e5e5;
             --border-light: #eeeeee;
-            --border-accent: rgba(180, 145, 65, 0.25);
+            --border-accent: rgba(59, 109, 181, 0.25);
             --shadow-card: 0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.05);
             --shadow-lg: 0 1px 2px rgba(0,0,0,0.05), 0 8px 24px rgba(0,0,0,0.08);
             --shadow-glow: 0 0 40px rgba(180, 145, 65, 0.1);
@@ -107,8 +107,8 @@
             --header-text: #1a1814;
             --tab-bar-bg: rgba(244,242,237,0.92);
             --tab-inactive: rgba(0,0,0,0.32);
-            --tab-active-text: #8b6914;
-            --tab-active-bg: rgba(180,145,65,0.12);
+            --tab-active-text: #2563a0;
+            --tab-active-bg: rgba(59,109,181,0.1);
             --bg-overlay: rgba(0,0,0,0.02);
         }
         [data-theme="light"] body { background: #ffffff; }
@@ -128,7 +128,7 @@
             --text-heading: #1a1208;
             --border: #e8dcc8;
             --border-light: #f0e8d8;
-            --border-accent: rgba(190, 150, 70, 0.25);
+            --border-accent: rgba(59, 109, 181, 0.25);
             --shadow-card: 0 1px 2px rgba(0,0,0,0.03), 0 4px 12px rgba(0,0,0,0.04);
             --shadow-lg: 0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06);
             --shadow-glow: 0 0 40px rgba(190, 150, 70, 0.1);
@@ -137,7 +137,7 @@
             --tab-bar-bg: rgba(250,246,240,0.92);
             --tab-inactive: rgba(0,0,0,0.30);
             --tab-active-text: #8b6914;
-            --tab-active-bg: rgba(190,150,70,0.12);
+            --tab-active-bg: rgba(59,109,181,0.1);
             --bg-overlay: rgba(0,0,0,0.02);
         }
         [data-theme="warm"] body { background: #faf6f0; }
@@ -391,7 +391,7 @@
             font-family: inherit;
             position: relative;
             z-index: 1;
-            box-shadow: 0 2px 8px rgba(201,164,75,0.25);
+            box-shadow: 0 2px 8px rgba(59,109,181,0.3);
         }
         .btn-start:active { transform: scale(0.97); }
         .btn-start:disabled {
@@ -2832,12 +2832,12 @@
                 background_color: '#080c12',
                 theme_color: '#080c12',
                 icons: [{
-                    src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='80' fill='%23080c12'/%3E%3Ctext x='256' y='340' text-anchor='middle' font-size='240' fill='%23c9a44b' font-family='serif' font-weight='bold'%3E考%3C/text%3E%3C/svg%3E",
+                    src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='80' fill='%23080c12'/%3E%3Ctext x='256' y='340' text-anchor='middle' font-size='240' fill='%233b6db5' font-family='serif' font-weight='bold'%3E考%3C/text%3E%3C/svg%3E",
                     sizes: '512x512',
                     type: 'image/svg+xml',
                     purpose: 'any'
                 }, {
-                    src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%23080c12'/%3E%3Ctext x='96' y='130' text-anchor='middle' font-size='100' fill='%23c9a44b' font-family='serif' font-weight='bold'%3E考%3C/text%3E%3C/svg%3E",
+                    src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%23080c12'/%3E%3Ctext x='96' y='130' text-anchor='middle' font-size='100' fill='%233b6db5' font-family='serif' font-weight='bold'%3E考%3C/text%3E%3C/svg%3E",
                     sizes: '192x192',
                     type: 'image/svg+xml',
                     purpose: 'any'
