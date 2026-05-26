@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="theme-color" content="#080c12">
+    <meta name="theme-color" content="#ffffff">
     <title>考试计时器</title>
     <!-- iOS 主屏幕图标（通过内联 SVG data URI） -->
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='36' fill='%23080c12'/%3E%3Ctext x='90' y='126' text-anchor='middle' font-size='100' fill='%233b6db5' font-family='serif'%3E考%3C/text%3E%3C/svg%3E">
@@ -36,7 +36,7 @@
         html, body {
             font-family: "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
             font-size: 16px;
-            background: #080c12;
+            background: #ffffff;
             color: var(--text-primary);
             -webkit-tap-highlight-color: transparent;
             overflow: hidden;
@@ -65,32 +65,34 @@
         }
 
         /* ==================== Theme Variables ==================== */
-        :root {
-            --bg-page: #080c12;
-            --bg-card: #11161e;
-            --bg-subtle: #161c27;
-            --bg-muted: #1b212d;
-            --bg-overlay: rgba(255,255,255,0.02);
-            --text-primary: #e8e3d7;
-            --text-secondary: #8b8574;
-            --text-muted: #544f42;
-            --text-heading: #f0ebe0;
-            --border: #1e2532;
-            --border-light: #181e29;
-            --border-accent: rgba(59, 109, 181, 0.2);
-            --shadow-card: 0 1px 2px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.3);
-            --shadow-lg: 0 1px 2px rgba(0,0,0,0.5), 0 8px 32px rgba(0,0,0,0.5);
-            --shadow-glow: 0 0 40px rgba(201, 164, 75, 0.08);
-            --header-bg: #080c12;
-            --header-text: #e8e3d7;
+        /* 默认：浅色主题 */
+        :root,
+        [data-theme="light"] {
+            --bg-page: #ffffff;
+            --bg-card: #ffffff;
+            --bg-subtle: #f6f6f6;
+            --bg-muted: #eeeeee;
+            --bg-overlay: rgba(0,0,0,0.02);
+            --text-primary: #1d1f24;
+            --text-secondary: #5c6370;
+            --text-muted: #949da8;
+            --text-heading: #121418;
+            --border: #e2e4e8;
+            --border-light: #edf0f3;
+            --border-accent: rgba(59, 109, 181, 0.25);
+            --shadow-card: 0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.05);
+            --shadow-lg: 0 1px 2px rgba(0,0,0,0.05), 0 8px 24px rgba(0,0,0,0.08);
+            --shadow-glow: 0 0 40px rgba(59, 109, 181, 0.08);
+            --header-bg: #f4f5f7;
+            --header-text: #1d1f24;
             --tab-bar-bg: rgba(255,255,255,0.88);
-            --tab-inactive: rgba(0,0,0,0.35);
-            --tab-active-text: #7aafdb;
-            --tab-active-bg: rgba(59,109,181,0.15);
+            --tab-inactive: rgba(0,0,0,0.32);
+            --tab-active-text: #2563a0;
+            --tab-active-bg: rgba(59,109,181,0.1);
             --accent: #3b6db5;
             --accent-dim: #2a4d7a;
             --accent-glow: rgba(59, 109, 181, 0.12);
-            --accent-text: #7aafdb;
+            --accent-text: #2563a0;
             --blue: #6b9aca;
             --blue-dim: #3d5a7a;
             --green: #5a9e8f;
@@ -100,63 +102,76 @@
             --amber: #c98f4b;
             --purple: #9b7ec4;
         }
-
-        [data-theme="light"] {
-            --bg-page: #ffffff;
-            --bg-card: #ffffff;
-            --bg-subtle: #f6f6f6;
-            --bg-muted: #eeeeee;
-            --text-primary: #1a1814;
-            --text-secondary: #6b6658;
-            --text-muted: #a09880;
-            --text-heading: #0d0c09;
-            --border: #e5e5e5;
-            --border-light: #eeeeee;
-            --border-accent: rgba(59, 109, 181, 0.25);
-            --shadow-card: 0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.05);
-            --shadow-lg: 0 1px 2px rgba(0,0,0,0.05), 0 8px 24px rgba(0,0,0,0.08);
-            --shadow-glow: 0 0 40px rgba(180, 145, 65, 0.1);
-            --header-bg: #f4f2ed;
-            --header-text: #1a1814;
-            --tab-bar-bg: rgba(255,255,255,0.88);
-            --tab-inactive: rgba(0,0,0,0.32);
-            --tab-active-text: #2563a0;
-            --tab-active-bg: rgba(59,109,181,0.1);
-            --bg-overlay: rgba(0,0,0,0.02);
-        }
-        [data-theme="light"] body { background: #ffffff; }
-        [data-theme="light"] #app::after { opacity: 0.025; }
-        [data-theme="light"] #bottomTabBar {
+        body { background: #ffffff; }
+        #app::after { opacity: 0.025; }
+        #bottomTabBar {
             box-shadow: 0 2px 16px rgba(0,0,0,0.08), 0 0 0 0.5px rgba(0,0,0,0.05);
         }
 
-        [data-theme="warm"] {
-            --bg-page: #faf6f0;
-            --bg-card: #fffdf8;
-            --bg-subtle: #f8f2e8;
-            --bg-muted: #f0e8d8;
-            --text-primary: #2d2416;
-            --text-secondary: #7a6b50;
-            --text-muted: #b0a080;
-            --text-heading: #1a1208;
-            --border: #e8dcc8;
-            --border-light: #f0e8d8;
-            --border-accent: rgba(59, 109, 181, 0.25);
-            --shadow-card: 0 1px 2px rgba(0,0,0,0.03), 0 4px 12px rgba(0,0,0,0.04);
-            --shadow-lg: 0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06);
-            --shadow-glow: 0 0 40px rgba(190, 150, 70, 0.1);
-            --header-bg: #faf6f0;
-            --header-text: #2d2416;
+        /* 暗色主题 */
+        [data-theme="dark"] {
+            --bg-page: #080c12;
+            --bg-card: #11161e;
+            --bg-subtle: #161c27;
+            --bg-muted: #1b212d;
+            --bg-overlay: rgba(255,255,255,0.02);
+            --text-primary: #e2e5eb;
+            --text-secondary: #8b9099;
+            --text-muted: #5a5f6b;
+            --text-heading: #edf0f5;
+            --border: #1e2532;
+            --border-light: #181e29;
+            --border-accent: rgba(59, 109, 181, 0.2);
+            --shadow-card: 0 1px 2px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.3);
+            --shadow-lg: 0 1px 2px rgba(0,0,0,0.5), 0 8px 32px rgba(0,0,0,0.5);
+            --shadow-glow: 0 0 40px rgba(59, 109, 181, 0.08);
+            --header-bg: #080c12;
+            --header-text: #e2e5eb;
             --tab-bar-bg: rgba(255,255,255,0.88);
-            --tab-inactive: rgba(0,0,0,0.30);
-            --tab-active-text: #8b6914;
-            --tab-active-bg: rgba(59,109,181,0.1);
-            --bg-overlay: rgba(0,0,0,0.02);
+            --tab-inactive: rgba(0,0,0,0.35);
+            --tab-active-text: #7aafdb;
+            --tab-active-bg: rgba(59,109,181,0.15);
+            --accent: #3b6db5;
+            --accent-text: #7aafdb;
         }
-        [data-theme="warm"] body { background: #faf6f0; }
-        [data-theme="warm"] #app::after { opacity: 0.02; }
-        [data-theme="warm"] #bottomTabBar {
-            box-shadow: 0 2px 16px rgba(0,0,0,0.06), 0 0 0 0.5px rgba(0,0,0,0.04);
+        [data-theme="dark"] body { background: #080c12; }
+        [data-theme="dark"] #app::after { opacity: 0.035; }
+        [data-theme="dark"] #bottomTabBar {
+            box-shadow: 0 2px 16px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.06);
+        }
+
+        /* 跟随系统：暗色模式下使用暗色主题 */
+        @media (prefers-color-scheme: dark) {
+            [data-theme="system"] {
+                --bg-page: #080c12;
+                --bg-card: #11161e;
+                --bg-subtle: #161c27;
+                --bg-muted: #1b212d;
+                --bg-overlay: rgba(255,255,255,0.02);
+                --text-primary: #e2e5eb;
+                --text-secondary: #8b9099;
+                --text-muted: #5a5f6b;
+                --text-heading: #edf0f5;
+                --border: #1e2532;
+                --border-light: #181e29;
+                --border-accent: rgba(59, 109, 181, 0.2);
+                --shadow-card: 0 1px 2px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.3);
+                --shadow-lg: 0 1px 2px rgba(0,0,0,0.5), 0 8px 32px rgba(0,0,0,0.5);
+                --shadow-glow: 0 0 40px rgba(59, 109, 181, 0.08);
+                --header-bg: #080c12;
+                --header-text: #e2e5eb;
+                --tab-bar-bg: rgba(255,255,255,0.88);
+                --tab-inactive: rgba(0,0,0,0.35);
+                --tab-active-text: #7aafdb;
+                --tab-active-bg: rgba(59,109,181,0.15);
+                --accent: #3b6db5;
+                --accent-text: #7aafdb;
+            }
+            [data-theme="system"] body { background: #080c12; }
+            [data-theme="system"] #app::after { opacity: 0.035; }
+            [data-theme="system"] #bottomTabBar {
+                box-shadow: 0 2px 16px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.06);
+            }
         }
 
         /* ==================== Typography ==================== */
@@ -240,7 +255,19 @@
             position: relative;
             z-index: 1;
         }
+        .mode-indicator {
+            position: absolute;
+            top: 3px;
+            bottom: 3px;
+            border-radius: 8px;
+            background: var(--bg-card);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            transition: left 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            z-index: 0;
+        }
         .mode-btn {
+            position: relative;
             flex: 1;
             padding: 10px 8px;
             border: none;
@@ -250,16 +277,15 @@
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+            transition: color 0.3s cubic-bezier(0.4,0,0.2,1);
             text-align: center;
             -webkit-user-select: none;
             user-select: none;
             font-family: inherit;
+            z-index: 1;
         }
         .mode-btn.active {
-            background: var(--bg-card);
             color: var(--text-heading);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
         }
         .mode-btn:active {
             transform: scale(0.97);
@@ -337,8 +363,8 @@
             flex: 1;
         }
         .label-range-inputs input {
-            width: 52px;
-            padding: 6px 8px;
+            width: 60px;
+            padding: 6px 6px;
             border: 1px solid var(--border);
             border-radius: 6px;
             font-size: 13px;
@@ -370,7 +396,7 @@
             font-size: 13px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
             -webkit-user-select: none;
             user-select: none;
             color: var(--text-secondary);
@@ -378,7 +404,7 @@
         }
         .type-label-btn.active {
             background: var(--accent);
-            color: #0d0c09;
+            color: #fff;
             border-color: var(--accent);
             font-weight: 600;
         }
@@ -393,7 +419,7 @@
             border: none;
             border-radius: 12px;
             background: var(--accent);
-            color: #0d0c09;
+            color: #ffffff;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
@@ -588,46 +614,56 @@
 
         /* Option buttons */
         .options-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
         .option-btn {
-            padding: 20px 14px;
+            padding: 16px 18px;
             border: 1px solid var(--border);
             border-radius: 12px;
             background: var(--bg-subtle);
             font-size: 17px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.15s cubic-bezier(0.4,0,0.2,1);
+            transition: all 0.08s ease;
             -webkit-user-select: none;
             user-select: none;
-            text-align: center;
+            text-align: left;
             color: var(--text-primary);
             position: relative;
             font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
         .option-btn:active {
-            transform: scale(0.96);
-            background: var(--bg-muted);
+            transform: scale(0.98);
         }
         .option-btn.selected {
             border-color: var(--accent);
-            background: var(--accent-glow);
-            color: var(--accent-text);
-            box-shadow: 0 0 0 1px var(--accent-glow);
+            background: var(--accent);
+            color: #ffffff;
+            box-shadow: 0 2px 12px rgba(59, 109, 181, 0.25);
         }
         .option-btn .option-letter {
-            display: block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             font-family: "JetBrains Mono", monospace;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             color: var(--text-muted);
-            margin-bottom: 4px;
-            letter-spacing: 0.06em;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: var(--bg-muted);
+            flex-shrink: 0;
         }
-        .option-btn.selected .option-letter { color: var(--accent-text); }
+        .option-btn.selected .option-letter {
+            color: #ffffff;
+            background: rgba(255,255,255,0.2);
+        }
 
         /* Nav buttons */
         .nav-buttons {
@@ -924,7 +960,7 @@
             border-radius: 14px;
             padding: 22px;
             width: 100%;
-            max-width: 600px;
+            max-width: 680px;
             margin-bottom: 14px;
             box-shadow: var(--shadow-card);
             border: 1px solid var(--border-light);
@@ -1062,6 +1098,121 @@
         }
         .history-back:active { background: var(--bg-muted); }
 
+        /* ==================== Statistics Page ==================== */
+        #page-stats {
+            padding: 24px 20px;
+            align-items: center;
+        }
+        .stats-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 20px;
+        }
+        .stats-header h3 {
+            font-family: "DM Serif Display", "Noto Serif SC", serif;
+            font-size: 22px;
+            font-weight: 400;
+            flex: 1;
+            color: var(--text-heading);
+        }
+        .stats-content {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .stats-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+            margin-bottom: 16px;
+        }
+        .stats-summary-item {
+            text-align: center;
+            padding: 14px 12px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-card);
+        }
+        .stats-summary-item .stat-num {
+            font-family: "JetBrains Mono", monospace;
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--accent-text);
+        }
+        .stats-summary-item .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        .stats-label-card {
+            background: var(--bg-card);
+            border-radius: 14px;
+            padding: 18px 22px;
+            width: 100%;
+            margin-bottom: 10px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-light);
+        }
+        .stats-label-card .stats-label-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .stats-label-card .stats-label-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            display: flex;
+            gap: 16px;
+        }
+        /* Bar chart */
+        .bar-chart-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .bar-chart-row .bar-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            width: 44px;
+            flex-shrink: 0;
+            text-align: right;
+        }
+        .bar-track {
+            flex: 1;
+            height: 12px;
+            background: var(--bg-muted);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            width: var(--bar-pct, 0%);
+            transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .bar-value {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-family: "JetBrains Mono", monospace;
+            font-variant-numeric: tabular-nums;
+            width: 48px;
+            flex-shrink: 0;
+        }
+        .stats-empty {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+            padding: 60px 20px;
+        }
+
         .history-list { width: 100%; max-width: 500px; }
         .history-empty {
             text-align: center;
@@ -1108,6 +1259,13 @@
             font-size: 12px;
             color: var(--text-muted);
             font-family: "JetBrains Mono", monospace;
+        }
+        .history-item-unfinished {
+            border-left: 3px solid var(--amber);
+        }
+        .history-mode-unfinished {
+            background: rgba(201,143,75,0.15);
+            color: var(--amber);
         }
         .history-item-stats span {
             display: flex;
@@ -1384,8 +1542,8 @@
 
         /* ==================== Responsive ==================== */
         @media (min-width: 600px) {
-            .options-grid { grid-template-columns: 1fr 1fr 1fr 1fr; }
-            .option-btn  { padding: 22px 16px; }
+            .options-grid { max-width: 560px; }
+            .option-btn  { padding: 22px 20px; }
             .home-title  { font-size: 42px; }
         }
 
@@ -1418,6 +1576,12 @@
             padding-right: calc(20px + var(--sar, env(safe-area-inset-right, 0px)));
             padding-bottom: 72px;
         }
+        #page-stats {
+            padding-top: calc(24px + var(--sat, env(safe-area-inset-top, 0px)));
+            padding-left: calc(20px + var(--sal, env(safe-area-inset-left, 0px)));
+            padding-right: calc(20px + var(--sar, env(safe-area-inset-right, 0px)));
+            padding-bottom: 72px;
+        }
         .exam-header {
             padding-top: calc(12px + var(--sat, env(safe-area-inset-top, 0px)));
             padding-left: calc(16px + var(--sal, env(safe-area-inset-left, 0px)));
@@ -1442,7 +1606,8 @@
             <div class="home-title">考试计时器</div>
             <div class="home-subtitle">选择模式开始练习</div>
 
-            <div class="mode-selector">
+            <div class="mode-selector" id="modeSelector">
+                <div class="mode-indicator" id="modeIndicator"></div>
                 <button class="mode-btn active" data-mode="set" onclick="switchMode('set')">
                     套卷模式
                 </button>
@@ -1555,7 +1720,7 @@
 
         <!-- ==================== Report Page ==================== -->
         <div id="page-report" class="page">
-            <button class="page-back-btn" style="max-width:600px;width:100%;margin-bottom:12px" onclick="goHome()">&larr; 返回首页</button>
+            <button class="page-back-btn" style="max-width:680px;width:100%;margin-bottom:12px" onclick="goHome()">&larr; 返回首页</button>
             <div class="report-title">答题报告</div>
             <div id="reportContent"></div>
             <div class="report-actions">
@@ -1567,16 +1732,21 @@
         <!-- ==================== History Page ==================== -->
         <div id="page-history" class="page">
             <div class="history-header">
-                <button class="history-back" onclick="goHome()">&lt; 返回</button>
                 <h3>历史记录</h3>
-                <div style="width:60px"></div>
             </div>
             <div class="history-list" id="historyList"></div>
         </div>
 
+        <!-- ==================== Statistics Page ==================== -->
+        <div id="page-stats" class="page">
+            <div class="stats-header">
+                <h3>统计数据</h3>
+            </div>
+            <div class="stats-content" id="statsContent"></div>
+        </div>
+
         <!-- ==================== Settings Page ==================== -->
         <div id="page-settings" class="page">
-            <button class="page-back-btn" style="max-width:500px;width:100%;margin-bottom:16px" onclick="goHome()">&larr; 返回首页</button>
             <div class="settings-card">
                 <h4>数据管理</h4>
                 <button class="settings-btn settings-btn-danger" onclick="clearAllData()">
@@ -1589,13 +1759,24 @@
             <div class="settings-card" style="margin-top:16px">
                 <h4>主题设置</h4>
                 <div class="theme-selector">
+                    <button class="theme-btn" data-theme="light" onclick="setTheme('light')">浅色</button>
                     <button class="theme-btn" data-theme="dark" onclick="setTheme('dark')">暗色</button>
-                    <button class="theme-btn" data-theme="light" onclick="setTheme('light')">亮色</button>
-                    <button class="theme-btn" data-theme="warm" onclick="setTheme('warm')">暖色</button>
+                    <button class="theme-btn" data-theme="system" onclick="setTheme('system')">跟随系统</button>
                 </div>
             </div>
+            <div class="settings-card" style="margin-top:16px">
+                <h4>数据备份</h4>
+                <button class="settings-btn" onclick="exportData()" style="margin-bottom:8px">
+                    <span style="font-size:16px;width:20px;text-align:center">&#8595;</span>
+                    导出数据 (JSON)
+                </button>
+                <button class="settings-btn settings-btn-secondary" onclick="importData()">
+                    <span style="font-size:16px;width:20px;text-align:center">&#8593;</span>
+                    导入数据 (JSON)
+                </button>
+            </div>
             <div style="margin-top:24px;font-size:13px;color:var(--text-muted);line-height:1.8;text-align:center;width:100%;max-width:500px">
-                <p>考试计时器 v2.1</p>
+                <p>考试计时器 v2.2</p>
                 <p>支持套卷与题型模式的练习计时工具。</p>
                 <p style="font-size:11px;margin-top:4px">数据全部存储在本地浏览器中，不会上传至任何服务器。</p>
             </div>
@@ -1627,6 +1808,12 @@
                     <svg viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14A6 6 0 1110 4a6 6 0 010 12zm1-6.41V6H9v4.41l3.3 3.3 1.4-1.4L11 9.59z"/></svg>
                 </span>
                 <span class="tab-label">历史</span>
+            </button>
+            <button class="tab-item" data-tab="page-stats" onclick="switchTab('page-stats')">
+                <span class="tab-icon">
+                    <svg viewBox="0 0 20 20"><rect x="1" y="10" width="3.5" height="9" rx="0.5"/><rect x="6.5" y="5" width="3.5" height="14" rx="0.5"/><rect x="12" y="2" width="3.5" height="17" rx="0.5"/></svg>
+                </span>
+                <span class="tab-label">统计</span>
             </button>
             <button class="tab-item" data-tab="page-settings" onclick="switchTab('page-settings')">
                 <span class="tab-icon">
@@ -1747,7 +1934,7 @@
             // 关闭可能打开的 modal
             closeAnswerSheet();
             // 根据页面自动隐藏/显示底栏
-            if (['page-home', 'page-history', 'page-settings'].includes(pageId)) {
+            if (['page-home', 'page-history', 'page-stats', 'page-settings'].includes(pageId)) {
                 showTabBar();
             } else {
                 hideTabBar();
@@ -1767,6 +1954,8 @@
         function switchTab(pageId) {
             // 不允许切换到考试页、提交页、报告页（通过 tab bar）
             if (pageId === 'page-exam' || pageId === 'page-submit' || pageId === 'page-report') return;
+            if (pageId === 'page-history') showHistory();
+            if (pageId === 'page-stats') renderStats();
             showPage(pageId);
             // 更新 tab 高亮
             let activeTab = null;
@@ -1814,13 +2003,27 @@
         //  HOME / SETUP
         // ================================================================
 
+        function updateModeIndicator(activeBtn) {
+            const indicator = document.getElementById('modeIndicator');
+            if (!indicator || !activeBtn) return;
+            const selector = document.getElementById('modeSelector');
+            const selectorRect = selector.getBoundingClientRect();
+            const btnRect = activeBtn.getBoundingClientRect();
+            indicator.style.left = (btnRect.left - selectorRect.left) + 'px';
+            indicator.style.width = btnRect.width + 'px';
+        }
+
         function switchMode(mode) {
             currentMode = mode;
+            let activeBtn = null;
             document.querySelectorAll('.mode-btn').forEach(b => {
-                b.classList.toggle('active', b.dataset.mode === mode);
+                const isActive = b.dataset.mode === mode;
+                b.classList.toggle('active', isActive);
+                if (isActive) activeBtn = b;
             });
             document.getElementById('config-set').classList.toggle('hidden', mode !== 'set');
             document.getElementById('config-type').classList.toggle('hidden', mode !== 'type');
+            requestAnimationFrame(() => updateModeIndicator(activeBtn));
             onConfigChange();
         }
 
@@ -1850,9 +2053,19 @@
                     });
                 } else {
                     switchMode('type');
-                    // 选中对应的题型按钮
+                    // 选中对应的题型按钮，并更新行内样式
                     document.querySelectorAll('.type-label-btn').forEach(b => {
-                        b.classList.toggle('active', b.dataset.label === c.typeLabel);
+                        const isActive = b.dataset.label === c.typeLabel;
+                        b.classList.toggle('active', isActive);
+                        if (isActive) {
+                            b.style.background = LABEL_COLORS[b.dataset.label] || 'var(--accent)';
+                            b.style.color = '#fff';
+                            b.style.borderColor = LABEL_COLORS[b.dataset.label] || 'var(--accent)';
+                        } else {
+                            b.style.background = 'var(--bg-subtle)';
+                            b.style.color = LABEL_COLORS[b.dataset.label] || 'var(--text-secondary)';
+                            b.style.borderColor = LABEL_COLORS[b.dataset.label] || 'var(--border)';
+                        }
                     });
                     document.getElementById('typeCount').value = c.typeCount;
                 }
@@ -1863,6 +2076,10 @@
             }
 
             onConfigChange();
+
+            // 初始化模式滑动指示器
+            const activeModeBtn = document.querySelector('.mode-btn.active');
+            if (activeModeBtn) requestAnimationFrame(() => updateModeIndicator(activeModeBtn));
         }
 
         function renderLabelRanges() {
@@ -1888,22 +2105,26 @@
         function renderTypeLabels() {
             const container = document.getElementById('typeLabelSelector');
             container.innerHTML = '';
+
             LABEL_ORDER.forEach((name, idx) => {
                 const btn = document.createElement('button');
                 btn.className = 'type-label-btn' + (idx === 0 ? ' active' : '');
                 btn.dataset.label = name;
                 btn.textContent = name;
                 btn.style.borderColor = LABEL_COLORS[name] || 'var(--border)';
-                btn.style.color = LABEL_COLORS[name] || 'var(--text-secondary)';
+                btn.style.color = idx === 0 ? '#fff' : (LABEL_COLORS[name] || 'var(--text-secondary)');
+                if (idx === 0) btn.style.background = LABEL_COLORS[name] || 'var(--accent)';
                 btn.onclick = function() {
                     document.querySelectorAll('.type-label-btn').forEach(b => {
                         b.classList.remove('active');
                         b.style.background = 'var(--bg-subtle)';
                         b.style.color = LABEL_COLORS[b.dataset.label] || 'var(--text-secondary)';
+                        b.style.borderColor = LABEL_COLORS[b.dataset.label] || 'var(--border)';
                     });
                     this.classList.add('active');
                     this.style.background = LABEL_COLORS[name] || 'var(--accent)';
                     this.style.color = '#fff';
+                    this.style.borderColor = LABEL_COLORS[name] || 'var(--accent)';
                     onConfigChange();
                 };
                 container.appendChild(btn);
@@ -2731,14 +2952,38 @@
         function showHistory() {
             const listEl = document.getElementById('historyList');
             const reports = appState.reports || [];
+            const hasProgress = appState.progress && appState.progress.status === 'inprogress';
 
-            if (reports.length === 0) {
+            if (reports.length === 0 && !hasProgress) {
                 listEl.innerHTML = '<div class="history-empty">暂无历史记录</div>';
                 showPage('page-history');
                 return;
             }
 
             let html = '';
+
+            // 进行中的考试显示为未完成条目
+            if (hasProgress) {
+                const p = appState.progress;
+                const total = getTotalQuestions(p.config);
+                const answered = Object.keys(p.answers || {}).length;
+                const modeText = p.config.mode === 'set' ? '套卷' : ('题型 · ' + (p.config.typeLabel || ''));
+                html += `
+                    <div class="history-item history-item-unfinished" onclick="resumeFromHistory()">
+                        <div class="history-item-header">
+                            <span class="history-item-date">进行中</span>
+                            <span class="history-item-mode">${modeText}</span>
+                            <span class="history-item-mode history-mode-unfinished">未完成</span>
+                        </div>
+                        <div class="history-item-stats">
+                            <span>${answered}/${total} 题</span>
+                            <span>第 ${p.currentQuestion} 题</span>
+                            <button class="history-delete" onclick="event.stopPropagation();discardUnfinished()">放弃</button>
+                        </div>
+                    </div>
+                `;
+            }
+
             reports.forEach((r, idx) => {
                 const total = r.totalQuestions || getTotalQuestions(r.config);
                 const answered = Object.keys(r.answers || {}).length;
@@ -2748,7 +2993,7 @@
                     hour: '2-digit',
                     minute: '2-digit'
                 });
-                const modeText = r.config.mode === 'set' ? '套卷' : '题型';
+                const modeText = r.config.mode === 'set' ? '套卷' : ('题型 · ' + (r.config.typeLabel || ''));
                 html += `
                     <div class="history-item" onclick="viewReportByIndex(${idx})">
                         <div class="history-item-header">
@@ -2766,6 +3011,39 @@
 
             listEl.innerHTML = html;
             showPage('page-history');
+        }
+
+        function resumeFromHistory() {
+            const p = appState.progress;
+            if (!p || p.status !== 'inprogress') {
+                showToast('没有未完成的考试');
+                return;
+            }
+            showPage('page-exam');
+            renderQuestion(p.currentQuestion);
+            startTimerDisplay();
+
+            if (p.isPaused) {
+                document.getElementById('timerDisplay').classList.add('paused');
+                document.getElementById('pauseOverlay').classList.add('open');
+            } else {
+                p.questionEntryWall = Date.now();
+                p.pausedTimeAtEntry = p.pausedTimeMs || 0;
+                saveState();
+            }
+            hideTabBar();
+        }
+
+        function discardUnfinished() {
+            appState.progress = null;
+            appState.config = null;
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            saveState();
+            showHistory();
+            showToast('已放弃');
         }
 
         function viewReportByIndex(idx) {
@@ -2813,19 +3091,173 @@
         }
 
         // ================================================================
+        //  STATISTICS
+        // ================================================================
+
+        function renderStats() {
+            const container = document.getElementById('statsContent');
+            const reports = appState.reports || [];
+
+            if (reports.length === 0) {
+                container.innerHTML = '<div class="stats-empty">暂无答题数据<br><span style="font-size:12px;opacity:0.6">完成考试后这里会显示统计</span></div>';
+                return;
+            }
+
+            let totalAnswered = 0;
+            const labelStats = {};
+            for (const label of LABELS) {
+                labelStats[label] = { count: 0, totalTime: 0 };
+            }
+
+            for (const r of reports) {
+                const config = r.config;
+                const total = r.totalQuestions || getTotalQuestions(config);
+                totalAnswered += Object.keys(r.answers || {}).length;
+
+                for (let i = 1; i <= total; i++) {
+                    const label = getLabelForQuestion(i, config);
+                    if (!label || !labelStats[label]) continue;
+                    if (r.answers && r.answers[i]) {
+                        labelStats[label].count++;
+                        labelStats[label].totalTime += (r.questionTimes && r.questionTimes[i]) || 0;
+                    }
+                }
+            }
+
+            const avgTimeOverall = totalAnswered > 0
+                ? Math.round(Object.values(labelStats).reduce((s, ls) => s + ls.totalTime, 0) / totalAnswered)
+                : 0;
+
+            const labelAvgs = {};
+            let maxAvg = 0;
+            for (const [name, ls] of Object.entries(labelStats)) {
+                const avg = ls.count > 0 ? Math.round(ls.totalTime / ls.count) : 0;
+                labelAvgs[name] = { count: ls.count, avgTime: avg };
+                if (avg > maxAvg) maxAvg = avg;
+            }
+
+            let summaryHtml = '';
+            summaryHtml += '<div class="stats-summary">';
+            summaryHtml += '<div class="stats-summary-item"><div class="stat-num">' + reports.length + '</div><div class="stat-label">考试次数</div></div>';
+            summaryHtml += '<div class="stats-summary-item"><div class="stat-num">' + totalAnswered + '</div><div class="stat-label">总答题数</div></div>';
+            summaryHtml += '<div class="stats-summary-item" style="grid-column:1/-1"><div class="stat-num">' + formatTimeShort(avgTimeOverall) + '</div><div class="stat-label">每题平均用时</div></div>';
+            summaryHtml += '</div>';
+
+            let typeCardsHtml = '';
+            for (const label of LABEL_ORDER) {
+                const data = labelAvgs[label];
+                if (!data || data.count === 0) continue;
+                const color = LABEL_COLORS[label] || 'var(--accent-text)';
+                const pct = maxAvg > 0 ? ((data.avgTime / maxAvg) * 100).toFixed(1) : 0;
+
+                typeCardsHtml += '<div class="stats-label-card">';
+                typeCardsHtml += '<div class="stats-label-title" style="color:' + color + '">' + label + '</div>';
+                typeCardsHtml += '<div class="stats-label-meta">';
+                typeCardsHtml += '<span>已答 ' + data.count + ' 题</span>';
+                typeCardsHtml += '<span>平均 ' + formatTimeShort(data.avgTime) + '</span>';
+                typeCardsHtml += '</div>';
+                typeCardsHtml += '<div class="bar-chart-row">';
+                typeCardsHtml += '<div class="bar-label">用时</div>';
+                typeCardsHtml += '<div class="bar-track"><div class="bar-fill" style="--bar-pct:' + pct + '%;background:' + color + '"></div></div>';
+                typeCardsHtml += '<div class="bar-value">' + formatTimeShort(data.avgTime) + '</div>';
+                typeCardsHtml += '</div>';
+                typeCardsHtml += '</div>';
+            }
+
+            container.innerHTML = summaryHtml + typeCardsHtml;
+        }
+
+        // ================================================================
+        //  DATA EXPORT / IMPORT
+        // ================================================================
+
+        const EXPORT_VERSION = 1;
+
+        function exportData() {
+            var exportObj = {
+                version: EXPORT_VERSION,
+                exportedAt: new Date().toISOString(),
+                appName: '考试计时器',
+                data: {
+                    config: appState.config,
+                    progress: appState.progress,
+                    reports: appState.reports
+                }
+            };
+
+            var jsonStr = JSON.stringify(exportObj, null, 2);
+            var blob = new Blob([jsonStr], { type: 'application/json' });
+            var url = URL.createObjectURL(blob);
+
+            var a = document.createElement('a');
+            a.href = url;
+            var ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            a.download = '考试计时器_备份_' + ts + '.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showToast('数据已导出');
+        }
+
+        function importData() {
+            if (appState.progress && appState.progress.status === 'inprogress') {
+                if (!confirm('当前有未完成的考试，导入数据将覆盖当前进度。是否继续？')) return;
+            }
+
+            var input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json,application/json';
+
+            input.onchange = function(e) {
+                var file = e.target.files[0];
+                if (!file) return;
+
+                var reader = new FileReader();
+                reader.onload = function(ev) {
+                    try {
+                        var parsed = JSON.parse(ev.target.result);
+
+                        if (!parsed || typeof parsed !== 'object') throw new Error('无效的JSON数据');
+                        if (!parsed.data || typeof parsed.data !== 'object') throw new Error('缺少 data 字段');
+                        if (!Array.isArray(parsed.data.reports)) throw new Error('reports 字段格式错误');
+
+                        appState.config = parsed.data.config || null;
+                        appState.progress = parsed.data.progress || null;
+                        appState.reports = parsed.data.reports || [];
+                        saveState();
+
+                        if (timerInterval) {
+                            clearInterval(timerInterval);
+                            timerInterval = null;
+                        }
+
+                        showToast('数据导入成功，共 ' + appState.reports.length + ' 条记录');
+
+                        showTabBar();
+                        switchTab('page-home');
+                        renderHomeConfig();
+                    } catch (err) {
+                        showToast('导入失败: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+
+            input.addEventListener('change', function() {
+                setTimeout(function() { input.remove(); }, 1000);
+            });
+
+            input.click();
+        }
+
+        // ================================================================
         //  RESUME DIALOG
         // ================================================================
 
         function checkResume() {
-            const p = appState.progress;
-            if (p && p.status === 'inprogress') {
-                const total = getTotalQuestions(p.config);
-                const answered = Object.keys(p.answers).length;
-                document.getElementById('resumeDialogInfo').textContent =
-                    `上次做到第 ${p.currentQuestion} 题（已答 ${answered}/${total} 题），是否继续？`;
-                document.getElementById('resumeDialog').classList.add('open');
-                return true;
-            }
+            // 不再弹窗，用户可从历史记录中继续答题
             return false;
         }
 
@@ -3000,13 +3432,20 @@
 
         function loadTheme() {
             const saved = localStorage.getItem('exam_timer_theme');
-            if (saved && ['light', 'warm', 'dark'].includes(saved)) {
+            if (saved && ['light', 'dark', 'system'].includes(saved)) {
                 setTheme(saved);
+            } else if (saved === 'warm') {
+                setTheme('light');
             } else {
-                // 默认暗色主题
-                setTheme('dark');
+                setTheme('light');
             }
         }
+
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            if (localStorage.getItem('exam_timer_theme') === 'system') {
+                document.documentElement.setAttribute('data-theme', 'system');
+            }
+        });
 
         // ================================================================
         //  INIT
