@@ -24,15 +24,76 @@
             height: 100%;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             font-size: 16px;
-            background: #f1f5f9;
-            color: #1e293b;
+            background: #1e3a5f;
+            color: var(--text-primary);
             -webkit-tap-highlight-color: transparent;
             overflow: hidden;
+        }
+        /* 页面使用主题变量背景覆盖 body */
+        #app {
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+            background: var(--bg-page);
         }
         #app {
             height: 100%;
             overflow: hidden;
             position: relative;
+        }
+
+        /* ==================== Theme Variables ==================== */
+        :root {
+            --bg-page: #ffffff;
+            --bg-card: #ffffff;
+            --bg-subtle: #f8fafc;
+            --bg-muted: #f1f5f9;
+            --bg-overlay: rgba(0,0,0,0.04);
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow-card: 0 2px 12px rgba(0,0,0,0.05);
+            --shadow-lg: 0 4px 24px rgba(0,0,0,0.08);
+            --header-bg: #1e3a5f;
+            --header-text: #ffffff;
+            --tab-bar-bg: rgba(30,58,95,0.95);
+            --tag-bg: #3b82f6;
+        }
+        [data-theme="warm"] {
+            --bg-page: #faf6f0;
+            --bg-card: #ffffff;
+            --bg-subtle: #f5f0e8;
+            --bg-muted: #efe8dc;
+            --bg-overlay: rgba(0,0,0,0.04);
+            --text-primary: #2d2416;
+            --text-secondary: #6b5d4a;
+            --text-muted: #9a8b78;
+            --border: #e8e0d0;
+            --border-light: #f0eade;
+            --shadow-card: 0 2px 12px rgba(0,0,0,0.04);
+            --shadow-lg: 0 4px 24px rgba(0,0,0,0.06);
+            --header-bg: #1e3a5f;
+            --header-text: #ffffff;
+            --tab-bar-bg: rgba(30,58,95,0.95);
+        }
+        [data-theme="dark"] {
+            --bg-page: #0f172a;
+            --bg-card: #1e293b;
+            --bg-subtle: #1e293b;
+            --bg-muted: #293548;
+            --bg-overlay: rgba(255,255,255,0.04);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #334155;
+            --border-light: #293548;
+            --shadow-card: 0 2px 12px rgba(0,0,0,0.2);
+            --shadow-lg: 0 4px 24px rgba(0,0,0,0.3);
+            --header-bg: #0f172a;
+            --header-text: #f1f5f9;
+            --tab-bar-bg: rgba(15,23,42,0.95);
         }
 
         /* ==================== Page System ==================== */
@@ -41,6 +102,7 @@
             height: 100%;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+            background: var(--bg-page);
         }
         .page.active {
             display: flex;
@@ -76,7 +138,7 @@
             display: flex;
             gap: 12px;
             width: 100%;
-            max-width: 400px;
+            max-width: 500px;
             margin-bottom: 24px;
         }
         .mode-btn {
@@ -103,21 +165,16 @@
         .mode-btn:active {
             transform: scale(0.97);
         }
-        .mode-btn .mode-icon {
-            display: block;
-            font-size: 22px;
-            margin-bottom: 4px;
-        }
 
         /* 配置面板 */
         .config-panel {
-            background: #fff;
+            background: var(--bg-card);
             border-radius: 16px;
             padding: 20px;
             width: 100%;
-            max-width: 400px;
-            color: #1e293b;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            max-width: 500px;
+            color: var(--text-primary);
+            box-shadow: var(--shadow-lg);
             flex-shrink: 0;
         }
         .config-panel.hidden {
@@ -233,7 +290,7 @@
         /* 开始按钮 */
         .btn-start {
             width: 100%;
-            max-width: 400px;
+            max-width: 500px;
             padding: 16px;
             margin-top: 16px;
             border: none;
@@ -279,7 +336,6 @@
 
         /* ==================== Exam Page ==================== */
         #page-exam {
-            background: #f1f5f9;
             position: relative;
         }
 
@@ -377,14 +433,13 @@
             overflow: hidden;
         }
 
-        /* 题目卡片 */
         .question-card {
-            background: #fff;
+            background: var(--bg-card);
             border-radius: 20px;
             padding: 28px 24px 24px;
             width: 100%;
-            max-width: 420px;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+            max-width: 480px;
+            box-shadow: var(--shadow-lg);
         }
 
         .question-card .q-num-large {
@@ -569,7 +624,7 @@
             left: 0;
             right: 0;
             max-height: 75vh;
-            background: #fff;
+            background: var(--bg-card);
             border-radius: 20px 20px 0 0;
             padding: 24px 20px;
             overflow-y: auto;
@@ -597,7 +652,7 @@
         .modal-close {
             padding: 8px 12px;
             border: none;
-            background: #f1f5f9;
+            background: var(--bg-muted);
             border-radius: 8px;
             font-size: 14px;
             cursor: pointer;
@@ -625,8 +680,8 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.15s;
-            border: 2px solid #e2e8f0;
-            background: #fff;
+            border: 2px solid var(--border);
+            background: var(--bg-card);
             color: #64748b;
             -webkit-user-select: none;
             user-select: none;
@@ -674,7 +729,7 @@
             color: #fff;
         }
         .modal-footer .btn-close-sheet {
-            background: #f1f5f9;
+            background: var(--bg-muted);
             color: #475569;
         }
 
@@ -682,7 +737,6 @@
         #page-submit {
             padding: 24px 20px;
             align-items: center;
-            background: #f1f5f9;
         }
         .submit-title {
             font-size: 22px;
@@ -696,13 +750,13 @@
             text-align: center;
         }
         .submit-stats {
-            background: #fff;
+            background: var(--bg-card);
             border-radius: 16px;
             padding: 20px;
             width: 100%;
-            max-width: 400px;
+            max-width: 500px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            box-shadow: var(--shadow-card);
         }
         .submit-stat-row {
             display: flex;
@@ -745,7 +799,7 @@
 
         .btn-confirm-submit {
             width: 100%;
-            max-width: 400px;
+            max-width: 500px;
             padding: 16px;
             border: none;
             border-radius: 12px;
@@ -768,7 +822,6 @@
         #page-report {
             padding: 24px 20px;
             align-items: center;
-            background: #f1f5f9;
         }
         .report-title {
             font-size: 22px;
@@ -778,13 +831,13 @@
         }
 
         .report-card {
-            background: #fff;
+            background: var(--bg-card);
             border-radius: 16px;
             padding: 20px;
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
             margin-bottom: 16px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            box-shadow: var(--shadow-card);
         }
         .report-card h4 {
             font-size: 16px;
@@ -872,7 +925,7 @@
             color: #fff;
         }
         .btn-report-history {
-            background: #f1f5f9;
+            background: var(--bg-muted);
             color: #475569;
         }
 
@@ -880,7 +933,6 @@
         #page-history {
             padding: 24px 20px;
             align-items: center;
-            background: #f1f5f9;
         }
         .history-header {
             display: flex;
@@ -993,11 +1045,11 @@
             display: flex;
         }
         .dialog-box {
-            background: #fff;
+            background: var(--bg-card);
             border-radius: 20px;
             padding: 28px 24px 20px;
             width: 100%;
-            max-width: 340px;
+            max-width: 360px;
             text-align: center;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
             animation: dialog-in 0.2s ease;
@@ -1045,7 +1097,7 @@
             color: #fff;
         }
         .dialog-btn-secondary {
-            background: #f1f5f9;
+            background: var(--bg-muted);
             color: #475569;
         }
 
@@ -1085,14 +1137,11 @@
 
         /* Safe area for iPhone notch & home indicator */
         /* constant() for iOS 11.0-11.2, env() for iOS 11.2+ */
-        body {
-            background: #1e3a5f;
-        }
         #page-home {
             padding-top: calc(24px + constant(safe-area-inset-top, 0px));
             padding-top: calc(24px + env(safe-area-inset-top, 0px));
-            padding-bottom: calc(24px + constant(safe-area-inset-bottom, 0px));
-            padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+            padding-bottom: calc(100px + constant(safe-area-inset-bottom, 0px));
+            padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
         }
         #page-exam {
             padding-bottom: constant(safe-area-inset-bottom, 0px);
@@ -1113,8 +1162,8 @@
         #page-history {
             padding-top: calc(24px + constant(safe-area-inset-top, 0px));
             padding-top: calc(24px + env(safe-area-inset-top, 0px));
-            padding-bottom: calc(24px + constant(safe-area-inset-bottom, 0px));
-            padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+            padding-bottom: calc(100px + constant(safe-area-inset-bottom, 0px));
+            padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
         }
         .exam-header {
             padding-top: calc(12px + constant(safe-area-inset-top, 0px));
@@ -1127,33 +1176,34 @@
         #page-settings {
             padding-top: calc(24px + constant(safe-area-inset-top, 0px));
             padding-top: calc(24px + env(safe-area-inset-top, 0px));
-            padding-bottom: calc(24px + constant(safe-area-inset-bottom, 0px));
-            padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+            padding-bottom: calc(100px + constant(safe-area-inset-bottom, 0px));
+            padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
         }
 
         /* ==================== Bottom Tab Bar ==================== */
         #bottomTabBar {
             position: fixed;
-            bottom: 16px;
-            left: 50%;
-            transform: translateX(-50%);
+            bottom: 0;
+            left: 0;
+            right: 0;
             display: flex;
             align-items: center;
-            background: rgba(30, 58, 95, 0.92);
+            justify-content: center;
+            background: var(--tab-bar-bg);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border-radius: 28px;
-            padding: 4px 6px;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.06);
+            border-radius: 0;
+            padding: 8px 16px;
+            padding-bottom: calc(8px + constant(safe-area-inset-bottom, 0px));
+            padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+            box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.1);
             z-index: 500;
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
             user-select: none;
             -webkit-user-select: none;
-            margin-bottom: constant(safe-area-inset-bottom, 0px);
-            margin-bottom: env(safe-area-inset-bottom, 0px);
         }
         #bottomTabBar.hidden {
-            transform: translateX(-50%) translateY(100px);
+            transform: translateY(100%);
             opacity: 0;
             pointer-events: none;
         }
@@ -1162,20 +1212,20 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 6px 20px;
-            min-height: 44px;
+            padding: 8px 28px;
+            min-height: 52px;
             border: none;
             background: transparent;
             color: rgba(255, 255, 255, 0.55);
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-            border-radius: 22px;
+            border-radius: 14px;
             transition: all 0.2s;
             -webkit-user-select: none;
             user-select: none;
             white-space: nowrap;
-            gap: 2px;
+            gap: 3px;
         }
         .tab-item:active {
             transform: scale(0.95);
@@ -1186,12 +1236,12 @@
         }
         .tab-item .tab-icon svg {
             display: block;
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             fill: currentColor;
         }
         .tab-item .tab-label {
-            font-size: 10px;
+            font-size: 11px;
             line-height: 1.2;
         }
 
@@ -1199,15 +1249,14 @@
         #page-settings {
             padding: 24px 20px;
             align-items: center;
-            background: #f1f5f9;
         }
         .settings-card {
-            background: #fff;
+            background: var(--bg-card);
             border-radius: 16px;
             padding: 20px;
             width: 100%;
-            max-width: 400px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            max-width: 500px;
+            box-shadow: var(--shadow-card);
         }
         .settings-card h4 {
             font-size: 16px;
@@ -1242,12 +1291,39 @@
             background: #fee2e2;
         }
         .settings-btn-secondary {
-            background: #f1f5f9;
+            background: var(--bg-muted);
             color: #475569;
             margin-top: 8px;
         }
         .settings-btn-secondary:active {
             background: #e2e8f0;
+        }
+        .theme-selector {
+            display: flex;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .theme-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-subtle);
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .theme-btn:active {
+            transform: scale(0.96);
+        }
+        .theme-btn.active {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            color: #2563eb;
         }
     </style>
 </head>
@@ -1261,11 +1337,9 @@
 
             <div class="mode-selector">
                 <button class="mode-btn active" data-mode="set" onclick="switchMode('set')">
-                    <span class="mode-icon" style="font-size:18px;font-weight:400">&#x25A3;</span>
                     套卷模式
                 </button>
                 <button class="mode-btn" data-mode="type" onclick="switchMode('type')">
-                    <span class="mode-icon" style="font-size:18px;font-weight:400">&#x25CF;</span>
                     题型模式
                 </button>
             </div>
@@ -1365,7 +1439,7 @@
             <div class="submit-title">确认交卷</div>
             <div class="submit-desc">请确认答题情况，交卷后将无法修改</div>
             <div class="submit-stats" id="submitStats"></div>
-            <div style="display:flex;gap:12px;width:100%;max-width:400px">
+            <div style="display:flex;gap:12px;width:100%;max-width:500px">
                 <button class="btn-confirm-submit" style="flex:1;background:#3b82f6;box-shadow:0 4px 16px rgba(59,130,246,0.3)" onclick="goBackToExam()">继续答题</button>
                 <button class="btn-confirm-submit" style="flex:1;background:#ef4444;box-shadow:0 4px 16px rgba(239,68,68,0.3)" onclick="confirmSubmit()">确认交卷</button>
             </div>
@@ -1403,7 +1477,13 @@
                 </button>
             </div>
             <div class="settings-card" style="margin-top:16px">
-                <h4>关于</h4>
+                <h4>主题设置</h4>
+                <div class="theme-selector">
+                    <button class="theme-btn active" data-theme="light" onclick="setTheme('light')">白色</button>
+                    <button class="theme-btn" data-theme="warm" onclick="setTheme('warm')">米白</button>
+                    <button class="theme-btn" data-theme="dark" onclick="setTheme('dark')">暗色</button>
+                </div>
+            </div>
                 <div style="font-size:14px;color:#64748b;line-height:1.6">
                     <p>考试计时器 v2.0</p>
                     <p>支持套卷与题型模式的练习计时工具。</p>
@@ -2669,7 +2749,7 @@
                 start_url: './index.html',
                 display: 'standalone',
                 orientation: 'portrait',
-                background_color: '#f1f5f9',
+                background_color: '#ffffff',
                 theme_color: '#1e3a5f',
                 icons: [{
                     src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='80' fill='%231e3a5f'/%3E%3Ctext x='256' y='340' text-anchor='middle' font-size='240' fill='white' font-family='system-ui,sans-serif' font-weight='bold'%3E考%3C/text%3E%3C/svg%3E",
@@ -2769,12 +2849,42 @@
         });
 
         // ================================================================
+        //  THEME
+        // ================================================================
+
+        function setTheme(theme) {
+            if (theme === 'light') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', theme);
+            }
+            localStorage.setItem('exam_timer_theme', theme);
+            document.querySelectorAll('.theme-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.theme === theme);
+            });
+        }
+
+        function loadTheme() {
+            const saved = localStorage.getItem('exam_timer_theme');
+            if (saved && ['light', 'warm', 'dark'].includes(saved)) {
+                setTheme(saved);
+            } else {
+                // 默认白色，高亮 white 按钮
+                document.querySelectorAll('.theme-btn').forEach(b => {
+                    b.classList.toggle('active', b.dataset.theme === 'light');
+                });
+            }
+        }
+
+        // ================================================================
         //  INIT
         // ================================================================
 
         function init() {
             // 加载存储数据
             loadState();
+            // 加载主题
+            loadTheme();
 
             // 渲染首页配置
             renderHomeConfig();
