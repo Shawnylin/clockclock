@@ -95,8 +95,8 @@
             --shadow-glow: 0 0 40px rgba(201, 164, 75, 0.08);
             --header-bg: #080c12;
             --header-text: #e8e3d7;
-            --tab-bar-bg: rgba(8,12,18,0.92);
-            --tab-inactive: rgba(255,255,255,0.42);
+            --tab-bar-bg: rgba(255,255,255,0.88);
+            --tab-inactive: rgba(0,0,0,0.35);
             --tab-active-text: #7aafdb;
             --tab-active-bg: rgba(59,109,181,0.15);
             --accent: #3b6db5;
@@ -130,7 +130,7 @@
             --shadow-glow: 0 0 40px rgba(180, 145, 65, 0.1);
             --header-bg: #f4f2ed;
             --header-text: #1a1814;
-            --tab-bar-bg: rgba(244,242,237,0.92);
+            --tab-bar-bg: rgba(255,255,255,0.88);
             --tab-inactive: rgba(0,0,0,0.32);
             --tab-active-text: #2563a0;
             --tab-active-bg: rgba(59,109,181,0.1);
@@ -139,7 +139,7 @@
         [data-theme="light"] body { background: #ffffff; }
         [data-theme="light"] #app::after { opacity: 0.025; }
         [data-theme="light"] #bottomTabBar {
-            box-shadow: 0 2px 16px rgba(0,0,0,0.08), 0 0 1px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 16px rgba(0,0,0,0.08), 0 0 0 0.5px rgba(0,0,0,0.05);
         }
 
         [data-theme="warm"] {
@@ -159,7 +159,7 @@
             --shadow-glow: 0 0 40px rgba(190, 150, 70, 0.1);
             --header-bg: #faf6f0;
             --header-text: #2d2416;
-            --tab-bar-bg: rgba(250,246,240,0.92);
+            --tab-bar-bg: rgba(255,255,255,0.88);
             --tab-inactive: rgba(0,0,0,0.30);
             --tab-active-text: #8b6914;
             --tab-active-bg: rgba(59,109,181,0.1);
@@ -168,7 +168,7 @@
         [data-theme="warm"] body { background: #faf6f0; }
         [data-theme="warm"] #app::after { opacity: 0.02; }
         [data-theme="warm"] #bottomTabBar {
-            box-shadow: 0 2px 16px rgba(0,0,0,0.06), 0 0 1px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 16px rgba(0,0,0,0.06), 0 0 0 0.5px rgba(0,0,0,0.04);
         }
 
         /* ==================== Typography ==================== */
@@ -1252,7 +1252,7 @@
             padding-bottom: calc(5px + var(--sab, env(safe-area-inset-bottom, 0px)));
             border-radius: 34px;
             border: 1px solid var(--border);
-            box-shadow: 0 2px 12px rgba(0,0,0,0.25), 0 0 1px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 16px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.06);
             z-index: 500;
             transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease;
             user-select: none;
