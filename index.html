@@ -60,7 +60,6 @@
             overflow: hidden;
             position: relative;
             background: var(--bg-page);
-            padding-bottom: var(--sab, 0px);
         }
 
         /* Grain texture overlay */
@@ -1210,7 +1209,7 @@
         /* ==================== Toast ==================== */
         .toast {
             position: fixed;
-            bottom: calc(80px + var(--sab, env(safe-area-inset-bottom, 0px)));
+            bottom: calc(80px + env(safe-area-inset-bottom, 0px));
             left: 50%;
             transform: translateX(-50%) translateY(20px);
             background: var(--bg-card);
@@ -1238,7 +1237,6 @@
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
-            bottom: var(--sab, env(safe-area-inset-bottom, 0px));
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1249,7 +1247,6 @@
             backdrop-filter: blur(24px) saturate(180%);
             -webkit-backdrop-filter: blur(24px) saturate(180%);
             padding: 5px 4px;
-            padding-bottom: calc(5px + var(--sab, env(safe-area-inset-bottom, 0px)));
             border-radius: 34px;
             border: 1px solid var(--border);
             box-shadow: 0 2px 16px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.06);
@@ -1390,30 +1387,30 @@
             padding-top: calc(24px + var(--sat, env(safe-area-inset-top, 0px)));
             padding-left: calc(20px + var(--sal, env(safe-area-inset-left, 0px)));
             padding-right: calc(20px + var(--sar, env(safe-area-inset-right, 0px)));
-            padding-bottom: calc(72px + var(--sab, env(safe-area-inset-bottom, 0px)));
+            padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
         }
         #page-exam {
             padding-left: var(--sal, env(safe-area-inset-left, 0px));
             padding-right: var(--sar, env(safe-area-inset-right, 0px));
-            padding-bottom: var(--sab, env(safe-area-inset-bottom, 0px));
+            padding-bottom: env(safe-area-inset-bottom, 0px);
         }
         #page-submit {
             padding-top: calc(24px + var(--sat, env(safe-area-inset-top, 0px)));
             padding-left: calc(20px + var(--sal, env(safe-area-inset-left, 0px)));
             padding-right: calc(20px + var(--sar, env(safe-area-inset-right, 0px)));
-            padding-bottom: calc(24px + var(--sab, env(safe-area-inset-bottom, 0px)));
+            padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
         }
         #page-report {
             padding-top: calc(24px + var(--sat, env(safe-area-inset-top, 0px)));
             padding-left: calc(20px + var(--sal, env(safe-area-inset-left, 0px)));
             padding-right: calc(20px + var(--sar, env(safe-area-inset-right, 0px)));
-            padding-bottom: calc(24px + var(--sab, env(safe-area-inset-bottom, 0px)));
+            padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
         }
         #page-history {
             padding-top: calc(24px + var(--sat, env(safe-area-inset-top, 0px)));
             padding-left: calc(20px + var(--sal, env(safe-area-inset-left, 0px)));
             padding-right: calc(20px + var(--sar, env(safe-area-inset-right, 0px)));
-            padding-bottom: calc(72px + var(--sab, env(safe-area-inset-bottom, 0px)));
+            padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
         }
         .exam-header {
             padding-top: calc(12px + var(--sat, env(safe-area-inset-top, 0px)));
@@ -1421,13 +1418,13 @@
             padding-right: calc(16px + var(--sar, env(safe-area-inset-right, 0px)));
         }
         .modal-content {
-            padding-bottom: calc(24px + var(--sab, env(safe-area-inset-bottom, 0px)));
+            padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
         }
         #page-settings {
             padding-top: calc(24px + var(--sat, env(safe-area-inset-top, 0px)));
             padding-left: calc(20px + var(--sal, env(safe-area-inset-left, 0px)));
             padding-right: calc(20px + var(--sar, env(safe-area-inset-right, 0px)));
-            padding-bottom: calc(72px + var(--sab, env(safe-area-inset-bottom, 0px)));
+            padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
         }
     </style>
 </head>
