@@ -193,9 +193,9 @@
 
         .home-title {
             font-family: "DM Serif Display", "Noto Serif SC", "Songti SC", serif;
-            font-size: 36px;
+            font-size: 32px;
             font-weight: 400;
-            margin: 32px 0 0;
+            margin: 12px 0 0;
             text-align: center;
             letter-spacing: 0.04em;
             color: var(--text-heading);
@@ -203,10 +203,10 @@
             z-index: 1;
         }
         .home-subtitle {
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-secondary);
-            margin-bottom: 40px;
-            margin-top: 6px;
+            margin-bottom: 20px;
+            margin-top: 4px;
             text-align: center;
             letter-spacing: 0.08em;
             text-transform: uppercase;
@@ -220,7 +220,7 @@
             gap: 0;
             width: 100%;
             max-width: 500px;
-            margin-bottom: 24px;
+            margin-bottom: 16px;
             background: var(--bg-muted);
             border-radius: 10px;
             padding: 3px;
@@ -256,7 +256,7 @@
         .config-panel {
             background: var(--bg-card);
             border-radius: 14px;
-            padding: 22px;
+            padding: 16px;
             width: 100%;
             max-width: 500px;
             color: var(--text-primary);
@@ -267,23 +267,23 @@
             z-index: 1;
         }
         .config-panel.hidden { display: none; }
-        .config-group { margin-bottom: 16px; }
+        .config-group { margin-bottom: 12px; }
         .config-group:last-child { margin-bottom: 0; }
         .config-label {
             display: block;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 500;
             color: var(--text-secondary);
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             text-transform: uppercase;
             letter-spacing: 0.06em;
         }
         .config-input {
             width: 100%;
-            padding: 10px 14px;
+            padding: 8px 12px;
             border: 1px solid var(--border);
             border-radius: 8px;
-            font-size: 15px;
+            font-size: 14px;
             font-family: inherit;
             outline: none;
             transition: border-color 0.2s, box-shadow 0.2s;
@@ -308,7 +308,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 9px 0;
+            padding: 6px 0;
             border-bottom: 1px solid var(--border-light);
         }
         .label-range-row:last-child { border-bottom: none; }
@@ -375,8 +375,8 @@
         .btn-start {
             width: 100%;
             max-width: 500px;
-            padding: 16px;
-            margin-top: 20px;
+            padding: 13px;
+            margin-top: 14px;
             border: none;
             border-radius: 12px;
             background: var(--accent);
@@ -403,7 +403,7 @@
         .btn-start.hidden { display: none; }
 
         .home-footer {
-            margin-top: 24px;
+            margin-top: 12px;
             text-align: center;
             position: relative;
             z-index: 1;
@@ -411,13 +411,33 @@
         .home-footer a {
             color: var(--text-secondary);
             text-decoration: none;
-            font-size: 13px;
-            padding: 8px 16px;
+            font-size: 12px;
+            padding: 6px 16px;
             display: inline-block;
             transition: color 0.2s;
         }
         .home-footer a:hover { color: var(--accent-text); }
         .home-footer a:active { opacity: 0.6; }
+
+        /* ==================== Page Back Button ==================== */
+        .page-back-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            background: var(--bg-subtle);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-family: inherit;
+            transition: all 0.15s;
+            -webkit-user-select: none;
+            user-select: none;
+            position: relative;
+            z-index: 1;
+            align-self: flex-start;
+        }
+        .page-back-btn:active { background: var(--bg-muted); transform: scale(0.96); }
 
         /* ==================== Exam Page ==================== */
         #page-exam { position: relative; }
@@ -1191,8 +1211,7 @@
         /* ==================== Bottom Tab Bar ==================== */
         #bottomTabBar {
             position: fixed;
-            bottom: calc(8px + constant(safe-area-inset-bottom, 0px));
-            bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+            bottom: env(safe-area-inset-bottom, 12px);
             left: 50%;
             transform: translateX(-50%);
             display: flex;
@@ -1344,8 +1363,8 @@
         #page-home {
             padding-top: calc(24px + constant(safe-area-inset-top, 0px));
             padding-top: calc(24px + env(safe-area-inset-top, 0px));
-            padding-bottom: calc(82px + constant(safe-area-inset-bottom, 0px));
-            padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+            padding-bottom: calc(74px + constant(safe-area-inset-bottom, 0px));
+            padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px));
         }
         #page-exam {
             padding-bottom: constant(safe-area-inset-bottom, 0px);
@@ -1366,8 +1385,8 @@
         #page-history {
             padding-top: calc(24px + constant(safe-area-inset-top, 0px));
             padding-top: calc(24px + env(safe-area-inset-top, 0px));
-            padding-bottom: calc(82px + constant(safe-area-inset-bottom, 0px));
-            padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+            padding-bottom: calc(74px + constant(safe-area-inset-bottom, 0px));
+            padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px));
         }
         .exam-header {
             padding-top: calc(12px + constant(safe-area-inset-top, 0px));
@@ -1380,8 +1399,8 @@
         #page-settings {
             padding-top: calc(24px + constant(safe-area-inset-top, 0px));
             padding-top: calc(24px + env(safe-area-inset-top, 0px));
-            padding-bottom: calc(82px + constant(safe-area-inset-bottom, 0px));
-            padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+            padding-bottom: calc(74px + constant(safe-area-inset-bottom, 0px));
+            padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px));
         }
     </style>
 </head>
@@ -1494,6 +1513,7 @@
 
         <!-- ==================== Submit Page ==================== -->
         <div id="page-submit" class="page">
+            <button class="page-back-btn" style="max-width:500px;width:100%;margin-bottom:16px" onclick="goBackToExam()">&larr; 返回答题</button>
             <div class="submit-title">确认交卷</div>
             <div class="submit-desc">请确认答题情况，交卷后将无法修改</div>
             <div class="submit-stats" id="submitStats"></div>
@@ -1505,6 +1525,7 @@
 
         <!-- ==================== Report Page ==================== -->
         <div id="page-report" class="page">
+            <button class="page-back-btn" style="max-width:600px;width:100%;margin-bottom:12px" onclick="goHome()">&larr; 返回首页</button>
             <div class="report-title">答题报告</div>
             <div id="reportContent"></div>
             <div class="report-actions">
@@ -1525,6 +1546,7 @@
 
         <!-- ==================== Settings Page ==================== -->
         <div id="page-settings" class="page">
+            <button class="page-back-btn" style="max-width:500px;width:100%;margin-bottom:16px" onclick="goHome()">&larr; 返回首页</button>
             <div class="settings-card">
                 <h4>数据管理</h4>
                 <button class="settings-btn settings-btn-danger" onclick="clearAllData()">
