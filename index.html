@@ -127,8 +127,8 @@
             --shadow-glow: 0 0 40px rgba(59, 109, 181, 0.08);
             --header-bg: #080c12;
             --header-text: #e2e5eb;
-            --tab-bar-bg: rgba(255,255,255,0.88);
-            --tab-inactive: rgba(0,0,0,0.35);
+            --tab-bar-bg: rgba(22,28,39,0.88);
+            --tab-inactive: rgba(255,255,255,0.35);
             --tab-active-text: #7aafdb;
             --tab-active-bg: rgba(59,109,181,0.15);
             --accent: #3b6db5;
@@ -137,7 +137,7 @@
         [data-theme="dark"] body { background: #080c12; }
         [data-theme="dark"] #app::after { opacity: 0.035; }
         [data-theme="dark"] #bottomTabBar {
-            box-shadow: 0 2px 16px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.06);
+            box-shadow: 0 2px 16px rgba(0,0,0,0.3), 0 0 0 0.5px rgba(255,255,255,0.06);
         }
 
         /* 跟随系统：暗色模式下使用暗色主题 */
@@ -160,8 +160,8 @@
                 --shadow-glow: 0 0 40px rgba(59, 109, 181, 0.08);
                 --header-bg: #080c12;
                 --header-text: #e2e5eb;
-                --tab-bar-bg: rgba(255,255,255,0.88);
-                --tab-inactive: rgba(0,0,0,0.35);
+                --tab-bar-bg: rgba(22,28,39,0.88);
+                --tab-inactive: rgba(255,255,255,0.35);
                 --tab-active-text: #7aafdb;
                 --tab-active-bg: rgba(59,109,181,0.15);
                 --accent: #3b6db5;
@@ -1036,6 +1036,61 @@
             font-family: inherit;
         }
 
+        /* 正确率输入 */
+        .accuracy-input-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 15px;
+            color: var(--text-secondary);
+        }
+        .accuracy-input-row input[type="number"] {
+            width: 60px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            font-family: "JetBrains Mono", monospace;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 8px;
+            background: var(--bg-subtle);
+            color: var(--accent-text);
+            outline: none;
+            -moz-appearance: textfield;
+        }
+        .accuracy-input-row input[type="number"]::-webkit-inner-spin-button,
+        .accuracy-input-row input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .accuracy-input-row input[type="number"]:focus {
+            border-color: var(--accent-text);
+        }
+        .accuracy-display {
+            text-align: center;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--green);
+            margin-top: 10px;
+        }
+        .accuracy-display.accuracy-empty {
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        /* 资料分析分组行 */
+        .group-header-row td {
+            background: var(--bg-subtle) !important;
+            font-weight: 600 !important;
+            color: var(--text-secondary) !important;
+            font-size: 12px !important;
+            padding: 10px 8px !important;
+            border-bottom: 2px solid var(--border) !important;
+        }
+
         .report-actions {
             display: flex;
             gap: 10px;
@@ -1381,7 +1436,7 @@
         /* ==================== Bottom Tab Bar ==================== */
         #bottomTabBar {
             position: fixed;
-            bottom: 12px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
@@ -2804,7 +2859,8 @@
                 questionTimes: JSON.parse(JSON.stringify(p.questionTimes)),
                 totalTime: totalTime,
                 totalPausedTime: p.pausedTimeMs || 0,
-                totalQuestions: getTotalQuestions(p.config)
+                totalQuestions: getTotalQuestions(p.config),
+                correctCount: null
             };
 
             // 保存到报告列表
@@ -2868,8 +2924,29 @@
             }
 
             // 每题明细表
+            // 题型模式 + 资料分析：每五题分组
+            const isTypeZiliao = config.mode === 'type' && config.typeLabel === '资料分析';
             let tableRows = '';
             for (let i = 1; i <= total; i++) {
+                // 资料分析分组：每组开头插入分组行
+                if (isTypeZiliao && (i - 1) % 5 === 0) {
+                    const groupStart = i;
+                    const groupEnd = Math.min(i + 4, total);
+                    let groupTotalTime = 0;
+                    let groupAnswered = 0;
+                    for (let g = groupStart; g <= groupEnd; g++) {
+                        groupTotalTime += (report.questionTimes[g] || 0);
+                        if (report.answers[g]) groupAnswered++;
+                    }
+                    const groupAvgTime = groupAnswered > 0 ? groupTotalTime / groupAnswered : 0;
+                    tableRows += `
+                        <tr class="group-header-row">
+                            <td colspan="2" style="font-weight:600;color:var(--text-secondary)">第 ${groupStart}-${groupEnd} 题</td>
+                            <td style="color:var(--text-muted)">${groupAnswered} 题已答</td>
+                            <td style="font-variant-numeric:tabular-nums;color:var(--accent-text)">总 ${formatTimeShort(groupTotalTime)} · 均 ${formatTimeShort(groupAvgTime)}</td>
+                        </tr>
+                    `;
+                }
                 const label = getLabelForQuestion(i, config);
                 const ans = report.answers[i] || '-';
                 const time = report.questionTimes[i] || 0;
@@ -2883,6 +2960,13 @@
                     </tr>
                 `;
             }
+
+            // 正确率显示
+            const savedCorrect = report.correctCount;
+            const accuracyVal = (savedCorrect !== null && savedCorrect !== undefined) ? (savedCorrect / answered * 100).toFixed(1) : null;
+            const accuracyHtml = accuracyVal !== null
+                ? `<div class="accuracy-display">${accuracyVal}%</div>`
+                : `<div class="accuracy-display accuracy-empty">请填写答对题数</div>`;
 
             container.innerHTML = `
                 <!-- 概要统计 -->
@@ -2909,6 +2993,17 @@
                     <div style="font-size:12px;color:var(--text-muted);margin-top:12px;text-align:center">
                         完成于 ${new Date(report.completedAt).toLocaleString('zh-CN')}
                     </div>
+                </div>
+
+                <!-- 正确率 -->
+                <div class="report-card">
+                    <h4>正确率</h4>
+                    <div class="accuracy-input-row">
+                        <span>答对</span>
+                        <input type="number" id="correctCountInput" min="0" max="${answered}" value="${savedCorrect !== null && savedCorrect !== undefined ? savedCorrect : ''}" placeholder="0" oninput="onCorrectCountInput(this, ${answered}, '${report.id}')" />
+                        <span>/ ${answered} 题</span>
+                    </div>
+                    ${accuracyHtml}
                 </div>
 
                 <!-- 标签统计 -->
@@ -2943,6 +3038,29 @@
             `;
 
             showPage('page-report');
+        }
+
+        function onCorrectCountInput(input, maxAnswered, reportId) {
+            let val = parseInt(input.value, 10);
+            if (isNaN(val) || val < 0) val = 0;
+            if (val > maxAnswered) val = maxAnswered;
+            input.value = val;
+
+            // 更新正确率显示
+            const accuracyDisplay = input.closest('.report-card').querySelector('.accuracy-display');
+            if (accuracyDisplay && val >= 0) {
+                const pct = maxAnswered > 0 ? (val / maxAnswered * 100).toFixed(1) : '0.0';
+                accuracyDisplay.textContent = pct + '%';
+                accuracyDisplay.classList.remove('accuracy-empty');
+            }
+
+            // 保存到报告
+            const reports = appState.reports || [];
+            const report = reports.find(r => r.id === reportId);
+            if (report) {
+                report.correctCount = val;
+                saveState();
+            }
         }
 
         // ================================================================
@@ -2994,6 +3112,8 @@
                     minute: '2-digit'
                 });
                 const modeText = r.config.mode === 'set' ? '套卷' : ('题型 · ' + (r.config.typeLabel || ''));
+                const hasAccuracy = r.correctCount !== null && r.correctCount !== undefined;
+                const accuracyText = hasAccuracy ? `正确率 ${(r.correctCount / answered * 100).toFixed(1)}%` : '';
                 html += `
                     <div class="history-item" onclick="viewReportByIndex(${idx})">
                         <div class="history-item-header">
@@ -3002,6 +3122,7 @@
                         </div>
                         <div class="history-item-stats">
                             <span>${answered}/${total} 题</span>
+                            ${accuracyText ? `<span style="color:var(--green)">${accuracyText}</span>` : ''}
                             <span>用时 ${formatTime(r.totalTime || 0)}</span>
                             <button class="history-delete" onclick="event.stopPropagation();deleteReport(${idx})">删除</button>
                         </div>
@@ -3104,6 +3225,8 @@
             }
 
             let totalAnswered = 0;
+            let totalCorrect = 0;
+            let accuracyCount = 0; // 有正确率数据的报告数
             const labelStats = {};
             for (const label of LABELS) {
                 labelStats[label] = { count: 0, totalTime: 0 };
@@ -3112,7 +3235,14 @@
             for (const r of reports) {
                 const config = r.config;
                 const total = r.totalQuestions || getTotalQuestions(config);
-                totalAnswered += Object.keys(r.answers || {}).length;
+                const answered = Object.keys(r.answers || {}).length;
+                totalAnswered += answered;
+
+                // 收集正确率数据
+                if (r.correctCount !== null && r.correctCount !== undefined) {
+                    totalCorrect += r.correctCount;
+                    accuracyCount++;
+                }
 
                 for (let i = 1; i <= total; i++) {
                     const label = getLabelForQuestion(i, config);
@@ -3136,11 +3266,19 @@
                 if (avg > maxAvg) maxAvg = avg;
             }
 
+            // 计算总体正确率
+            const overallAccuracy = accuracyCount > 0 ? (totalCorrect / totalAnswered * 100).toFixed(1) : null;
+
             let summaryHtml = '';
             summaryHtml += '<div class="stats-summary">';
             summaryHtml += '<div class="stats-summary-item"><div class="stat-num">' + reports.length + '</div><div class="stat-label">考试次数</div></div>';
             summaryHtml += '<div class="stats-summary-item"><div class="stat-num">' + totalAnswered + '</div><div class="stat-label">总答题数</div></div>';
-            summaryHtml += '<div class="stats-summary-item" style="grid-column:1/-1"><div class="stat-num">' + formatTimeShort(avgTimeOverall) + '</div><div class="stat-label">每题平均用时</div></div>';
+            if (overallAccuracy !== null) {
+                summaryHtml += '<div class="stats-summary-item"><div class="stat-num" style="color:var(--green)">' + overallAccuracy + '%</div><div class="stat-label">平均正确率（' + accuracyCount + ' 次）</div></div>';
+                summaryHtml += '<div class="stats-summary-item"><div class="stat-num">' + formatTimeShort(avgTimeOverall) + '</div><div class="stat-label">每题平均用时</div></div>';
+            } else {
+                summaryHtml += '<div class="stats-summary-item" style="grid-column:1/-1"><div class="stat-num">' + formatTimeShort(avgTimeOverall) + '</div><div class="stat-label">每题平均用时</div></div>';
+            }
             summaryHtml += '</div>';
 
             let typeCardsHtml = '';
