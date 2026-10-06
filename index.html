@@ -990,7 +990,6 @@
         .grade-dialog .grade-done button { margin-top: 0; }
         @media (min-width: 720px) {
             #reportContent { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            #reportContent > .report-export-card,
             #reportContent > .report-types-card,
             #reportContent > .report-details-card { grid-column: 1 / -1; }
             #reportTypeStats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -3442,11 +3441,12 @@
                 </div>
 
                 <!-- 正确率 -->
-                ${config.mode === 'set' ? `<div class="report-card report-score-card">
+                <div class="report-card report-score-card">
+                ${config.mode === 'set' ? `
                     <h4>本次成绩</h4>
                     <div class="score-summary" id="reportScoreSummary" aria-live="polite"></div>
                     <button class="btn-copy-report" id="btnEditReportGrade" onclick="openReportGrading()" aria-haspopup="dialog" aria-controls="reportGradeDialog">录入成绩</button>
-                </div>` : `<div class="report-card report-score-card">
+                ` : `
                     <h4>正确率</h4>
                     <div class="accuracy-input-row">
                         <span>答对</span>
@@ -3454,11 +3454,7 @@
                         <span>/ ${answered} 题</span>
                     </div>
                     ${accuracyHtml}
-                </div>`}
-
-                <div class="report-card report-export-card">
-                    <h4>导出本次成绩</h4>
-                    <div class="config-hint">一键复制成绩、分板块正确率与用时、逐题作答明细。</div>
+                `}
                     <button class="btn-copy-report" id="btnCopyReport" onclick="copyCurrentReport()">一键导出本次成绩（复制）</button>
                     <textarea class="config-input copy-fallback" id="reportCopyFallback" aria-label="本次成绩复制文本" readonly hidden></textarea>
                 </div>
