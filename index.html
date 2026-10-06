@@ -1090,6 +1090,21 @@
             font-size: 14px;
             font-weight: 400;
         }
+        .score-section { padding: 14px 0; border-bottom: 1px solid var(--border-light); }
+        .score-section:last-child { border-bottom: none; }
+        .score-section-header { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; margin-bottom: 10px; }
+        .score-section-header span { color: var(--text-secondary); font-size: 11px; }
+        .score-inputs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+        .score-inputs label { font-size: 11px; color: var(--text-secondary); }
+        .score-inputs input { margin-top: 4px; padding: 8px 5px; text-align: center; font-variant-numeric: tabular-nums; }
+        .score-section-detail { margin-top: 8px; font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+        .score-error { color: var(--red); font-size: 12px; line-height: 1.6; }
+        .score-summary { padding: 14px 0; text-align: center; line-height: 1.8; }
+        .score-summary strong { display: block; font-size: 26px; color: var(--accent-text); font-variant-numeric: tabular-nums; }
+        .score-title { display: block; font-size: 13px; color: var(--text-secondary); }
+        .score-numbers { font-size: clamp(18px, 6vw, 26px); white-space: nowrap; }
+        .btn-copy-report { width: 100%; padding: 12px; margin-top: 12px; border: 0; border-radius: 10px; background: var(--accent); color: #fff; cursor: pointer; font-family: inherit; }
+        .copy-fallback { width: 100%; min-height: 180px; margin-top: 12px; resize: vertical; }
 
         /* 资料分析分组行 */
         .group-header-row td {
@@ -1958,6 +1973,31 @@
                 labels: LABEL_ORDER.map((name, i) => ({ name, start: preset.ranges[i][0], end: preset.ranges[i][1] }))
             };
         }
+
+        // 公开机构估分权重，不是官方单题分值。首次生成报告时折算到满分 100。
+        // 判断推理采用整个板块的平均权重，详见 README.md 的调查记录。
+        const SCORING_PRESETS = {
+            'national-provincial': {
+                weights: [0.6, 0.6, 0.8, 0.8, 26 / 35, 0.9],
+                name: '国考副省级参考估分', source: 'https://www.cgzj.com/gk/4041.html',
+                note: '参考机构分值表（原表合计 101 分），折算到 100 分；判断推理使用板块平均分。'
+            },
+            'national-enforcement': {
+                weights: [0.8, 0.6, 0.8, 0.7, 0.8, 0.8],
+                name: '国考行政执法参考估分', source: 'https://m.huatu.com/2026/0710/2867850.html',
+                note: '采用机构公布的六板块估分权重，判断推理使用板块平均分。'
+            },
+            'guangdong': {
+                weights: [1, 0.8, 0.9, 1, 1, 1],
+                name: '广东省考参考估分', source: 'https://www.gwy.com/gdgwy/374406.html',
+                note: '参考 2025 年机构表；言语理解取区间中值 0.9，原权重合计 87.5 分，折算到 100 分。'
+            },
+            'tianjin': {
+                weights: [0.6, 0.5, 0.85, 0.9, 0.75, 1],
+                name: '天津市考通用权重估分', source: 'https://m.huatu.com/2026/0623/2866013.html',
+                note: '未检索到可靠的 2026 天津单题分值表；采用通用省考参考区间中值，政治理论按常识上界设为 0.6，再折算到 100 分。'
+            }
+        };
 
         const STORAGE_KEY = 'exam_timer_data';
         const SW_CACHE_KEY = 'exam-timer-v1';
@@ -2982,7 +3022,221 @@
         //  REPORT
         // ================================================================
 
+        let activeReport = null;
+
+        function escapeReportText(value) {
+            return String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+        }
+
+        function getReportName(config) {
+            const names = { 'national-provincial': '国考-副省级', 'national-enforcement': '国考-行政执法', guangdong: '广东-省考', tianjin: '天津-市考' };
+            if (config.mode !== 'set') return '题型 · ' + (config.typeLabel || '');
+            return (names[config.preset] || '自定义套卷') + (config.presetYear ? `（${config.presetYear} 年）` : '');
+        }
+
+        function getReportSections(report) {
+            const sections = new Map();
+            const total = report.totalQuestions || getTotalQuestions(report.config);
+            for (let q = 1; q <= total; q++) {
+                const name = getLabelForQuestion(q, report.config) || '未分类';
+                if (!sections.has(name)) sections.set(name, { name, total: 0, answered: 0, time: 0, start: q, end: q });
+                const section = sections.get(name);
+                section.total++;
+                section.end = q;
+                if (report.answers && report.answers[q]) section.answered++;
+                section.time += report.questionTimes?.[q] || 0;
+            }
+            return [...sections.values()];
+        }
+
+        function ensureReportGrading(report) {
+            if (report.grading) return;
+            const sections = getReportSections(report);
+            const preset = SCORING_PRESETS[report.config.preset];
+            const rawWeights = sections.map(s => preset?.weights[LABEL_ORDER.indexOf(s.name)] || 1);
+            const rawTotal = sections.reduce((sum, section, i) => sum + section.total * rawWeights[i], 0);
+            report.grading = {
+                version: 1,
+                name: preset?.name || '自定义套卷等权估分',
+                source: preset?.source || '',
+                note: preset?.note || '默认每题等权，折算到 100 分；可按练习题本修改单题分值。',
+                sections: Object.fromEntries(sections.map((s, i) => [s.name, {
+                    accuracy: null, correctCount: null,
+                    points: rawTotal > 0 ? rawWeights[i] * 100 / rawTotal : 0
+                }]))
+            };
+            saveState();
+        }
+
+        function getReportScore(report) {
+            const sections = getReportSections(report);
+            let knownScore = 0, fullScore = 0, correct = 0, entered = 0;
+            const details = sections.map(section => {
+                const saved = report.grading?.sections?.[section.name] || {};
+                const pointsValid = Number.isFinite(saved.points) && saved.points >= 0;
+                const valid = pointsValid && Number.isFinite(saved.accuracy) && saved.accuracy >= 0 && saved.accuracy <= 100 &&
+                    section.total * saved.accuracy / 100 <= section.answered + 1e-4;
+                const maxScore = pointsValid ? section.total * saved.points : 0;
+                const right = valid ? section.total * saved.accuracy / 100 : null;
+                const score = valid ? right * saved.points : null;
+                fullScore += maxScore;
+                if (valid) { knownScore += score; correct += right; entered++; }
+                return { ...section, ...saved, valid, maxScore, score, right };
+            });
+            const complete = sections.length > 0 && entered === sections.length;
+            return { details, complete, entered, correct, knownScore, fullScore,
+                accuracy: complete ? correct / (report.totalQuestions || getTotalQuestions(report.config)) * 100 : null,
+                percentScore: complete && fullScore > 0 ? knownScore / fullScore * 100 : null };
+        }
+
+        function getReportAccuracyInfo(report) {
+            if (report.config.mode === 'set' && report.grading) {
+                const score = getReportScore(report);
+                if (score.complete) return { correct: score.correct, denominator: report.totalQuestions || getTotalQuestions(report.config) };
+                if (Object.values(report.grading.sections || {}).some(s => s.accuracy !== null && s.accuracy !== undefined)) return null;
+            }
+            const answered = Object.keys(report.answers || {}).length;
+            return Number.isFinite(report.correctCount) && report.correctCount >= 0 && report.correctCount <= answered
+                ? { correct: report.correctCount, denominator: answered } : null;
+        }
+
+        function renderReportGrading(report) {
+            ensureReportGrading(report);
+            const rows = getReportScore(report).details.map((s, i) => `
+                <div class="score-section" data-section="${escapeReportText(s.name)}">
+                    <div class="score-section-header"><b style="color:${LABEL_COLORS[s.name] || 'var(--text-heading)'}">${escapeReportText(s.name)}</b><span>第 ${s.start}–${s.end} 题 · 已答 ${s.answered}/${s.total}</span></div>
+                    <div class="score-inputs">
+                        <label>答对题数<input class="config-input section-correct" type="number" min="0" max="${s.answered}" step="1" value="${s.correctCount ?? ''}" placeholder="${s.valid && s.correctCount === null ? '约 ' + s.right.toFixed(2) : '未录入'}" aria-label="${escapeReportText(s.name)}答对题数" data-index="${i}"></label>
+                        <label>正确率 %<input class="config-input section-accuracy" type="number" min="0" max="100" step="any" value="${s.accuracy === null || s.accuracy === undefined ? '' : Number(s.accuracy.toFixed(4))}" placeholder="未录入" aria-label="${escapeReportText(s.name)}正确率" data-index="${i}"></label>
+                        <label>单题分值<input class="config-input section-points" type="number" min="0" max="100" step="any" value="${Number(s.points.toFixed(6))}" aria-label="${escapeReportText(s.name)}单题分值" data-index="${i}"></label>
+                    </div>
+                    <div class="score-section-detail"></div><div class="score-error" role="status"></div>
+                </div>`).join('');
+            return `<div class="report-card" id="reportGrading">
+                <h4>分板块正确率与成绩</h4>
+                <div class="config-hint">填写答对题数或正确率，按各板块总题数计算，未答按错题计入。百分比录入仅用于估分，不推断逐题对错。留空表示未录入。</div>
+                ${Number.isFinite(report.correctCount) ? `<div class="config-hint">旧版总记录：答对 ${report.correctCount}/${Object.keys(report.answers || {}).length} 题。请分别录入各板块后计算成绩。</div>` : ''}
+                <div class="score-summary" id="reportScoreSummary" aria-live="polite"></div>
+                ${rows}
+                <details style="margin-top:12px"><summary class="config-hint">查看计分依据与说明</summary>
+                    <p class="config-hint">${escapeReportText(report.grading.name)}。${escapeReportText(report.grading.note)} 这是练习参考估分，不是官方成绩。修改单题分值后，满分按各板块题量 × 单题分值重新计算，同时提供百分制换算。</p>
+                    ${report.grading.source ? `<a class="config-hint" href="${escapeReportText(report.grading.source)}" target="_blank" rel="noopener noreferrer">查看参考来源</a>` : ''}
+                </details>
+            </div>`;
+        }
+
+        function bindReportGrading(report) {
+            document.querySelectorAll('#reportGrading input').forEach(input => {
+                input.addEventListener('input', () => onSectionGradeInput(input, report));
+            });
+            updateReportGradeDisplay(report);
+        }
+
+        function onSectionGradeInput(input, report) {
+            const sections = getReportSections(report);
+            const section = sections[Number(input.dataset.index)];
+            const row = input.closest('.score-section');
+            const saved = report.grading.sections[section.name];
+            const empty = input.value.trim() === '';
+            const value = empty ? null : Number(input.value);
+            let error = '';
+            if (input.classList.contains('section-points')) {
+                if (value === null || !Number.isFinite(value) || value < 0 || value > 100) error = '单题分值须为 0–100，不能为空。';
+                else { saved.points = value; report.grading.customized = true; }
+            } else if (input.classList.contains('section-correct')) {
+                if (!empty && (!Number.isInteger(value) || value < 0 || value > section.answered)) error = `答对题数须为 0–${section.answered} 的整数。`;
+                if (!error) {
+                    saved.correctCount = value;
+                    saved.accuracy = value === null ? null : value / section.total * 100;
+                    row.querySelector('.section-accuracy').value = saved.accuracy === null ? '' : Number(saved.accuracy.toFixed(4));
+                }
+            } else {
+                if (!empty && (!Number.isFinite(value) || value < 0 || value > 100)) error = '正确率须为 0–100。';
+                else if (!empty && section.total * value / 100 > section.answered + 1e-4) error = '正确率折合的答对题数不能超过已答题数。';
+                if (!error) {
+                    saved.accuracy = value === null ? null : Math.min(value, section.answered / section.total * 100);
+                    const count = saved.accuracy === null ? null : section.total * saved.accuracy / 100;
+                    saved.correctCount = count !== null && Math.abs(count - Math.round(count)) < 1e-6 ? Math.round(count) : null;
+                    row.querySelector('.section-correct').value = saved.correctCount ?? '';
+                    row.querySelector('.section-correct').placeholder = count === null ? '未录入' : `约 ${count.toFixed(2)}`;
+                }
+            }
+            if (!error && !input.classList.contains('section-points')) {
+                const paired = row.querySelector(input.classList.contains('section-correct') ? '.section-accuracy' : '.section-correct');
+                paired.setAttribute('aria-invalid', 'false');
+                paired.dataset.error = '';
+            }
+            input.setAttribute('aria-invalid', String(Boolean(error)));
+            input.dataset.error = error;
+            row.querySelector('.score-error').textContent = [...row.querySelectorAll('input')].map(field => field.dataset.error || '').filter(Boolean).join(' ');
+            if (!error) saveState();
+            updateReportGradeDisplay(report);
+        }
+
+        function updateReportGradeDisplay(report) {
+            const score = getReportScore(report);
+            const invalid = document.querySelector('#reportGrading [aria-invalid="true"]');
+            const summary = document.getElementById('reportScoreSummary');
+            if (invalid) summary.innerHTML = '<strong>请修正输入</strong><span class="config-hint">修正后更新成绩，当前输入尚未保存。</span>';
+            else if (score.complete) summary.innerHTML = `<strong><span class="score-title">参考估分</span><span class="score-numbers">${score.knownScore.toFixed(2)} / ${score.fullScore.toFixed(2)} 分</span></strong><span class="config-hint">总体正确率 ${score.accuracy.toFixed(2)}% · 百分制 ${score.percentScore === null ? '不可计算（满分为 0）' : score.percentScore.toFixed(2) + ' 分'}</span>`;
+            else summary.innerHTML = `<strong>待完成录入</strong><span class="config-hint">已录入 ${score.entered}/${score.details.length} 个板块 · 已录入得分 ${score.knownScore.toFixed(2)} 分 · 满分 ${score.fullScore.toFixed(2)} 分</span>`;
+            if (report.grading.customized) summary.innerHTML += '<div class="config-hint">已自定义单题分值</div>';
+            document.querySelectorAll('#reportGrading .score-section').forEach((row, i) => {
+                const s = score.details[i];
+                row.querySelector('.score-section-detail').textContent = `${s.valid ? '参考得分 ' + s.score.toFixed(2) : '正确率未录入'} / ${s.maxScore.toFixed(2)} 分 · 用时 ${formatTimeShort(s.time)} · 已答题均时 ${s.answered ? formatTimeShort(s.time / s.answered) : '—'}`;
+            });
+            document.getElementById('btnCopyReport').disabled = Boolean(invalid);
+        }
+
+        function buildReportExportText(report) {
+            const total = report.totalQuestions || getTotalQuestions(report.config);
+            const answered = Object.keys(report.answers || {}).length;
+            const lines = ['考试计时器 · 本次答题成绩', `套卷/题型：${getReportName(report.config)}`, `完成时间：${new Date(report.completedAt).toLocaleString('zh-CN')}`,
+                `总用时：${formatTime(report.totalTime || 0)}`, `答题情况：已答 ${answered}/${total} 题，未答 ${total - answered} 题`];
+            if (report.config.mode === 'set') {
+                ensureReportGrading(report);
+                const score = getReportScore(report);
+                lines.push(score.complete ? `参考估分：${score.knownScore.toFixed(2)} / ${score.fullScore.toFixed(2)} 分；百分制：${score.percentScore === null ? '不可计算（满分为 0）' : score.percentScore.toFixed(2) + ' 分'}；总体正确率：${score.accuracy.toFixed(2)}%`
+                    : `参考估分：待完成录入（${score.entered}/${score.details.length} 个板块）；已录入得分：${score.knownScore.toFixed(2)} 分；满分：${score.fullScore.toFixed(2)} 分`);
+                if (Number.isFinite(report.correctCount)) lines.push(`旧版总记录：答对 ${report.correctCount}/${answered} 题（不推算分板块成绩）。`);
+                lines.push(`计分依据：${report.grading.name}${report.grading.customized ? '（已自定义单题分值）' : ''}；${report.grading.note}`, '说明：练习参考估分，不是官方成绩。正确率按板块总题数计算，未答按错题计入。', '', '分板块情况：');
+                for (const s of score.details) lines.push(`${s.name}（第 ${s.start}–${s.end} 题）：已答 ${s.answered}/${s.total}；${s.valid ? '正确率 ' + s.accuracy.toFixed(2) + '%' : '正确率未录入'}；单题 ${s.points.toFixed(6)} 分；${s.valid ? '参考得分 ' + s.score.toFixed(2) : '得分未录入'} / ${s.maxScore.toFixed(2)} 分；用时 ${formatTimeShort(s.time)}；已答题均时 ${s.answered ? formatTimeShort(s.time / s.answered) : '—'}`);
+            } else {
+                const info = getReportAccuracyInfo(report);
+                lines.push(info ? `正确率：${info.denominator ? (info.correct / info.denominator * 100).toFixed(2) : '0.00'}%（按已答题数）` : '正确率：未录入');
+            }
+            lines.push('', '逐题作答明细（未标注每题对错）：');
+            for (let q = 1; q <= total; q++) lines.push(`第 ${q} 题 | ${getLabelForQuestion(q, report.config) || '未分类'} | ${report.answers?.[q] || '未答'} | ${formatTimeShort(report.questionTimes?.[q] || 0)}`);
+            return lines.join('\n');
+        }
+
+        async function copyCurrentReport() {
+            if (!activeReport) return;
+            if (document.querySelector('#reportContent [aria-invalid="true"]')) { showToast('请先修正成绩输入'); return; }
+            const text = buildReportExportText(activeReport);
+            const fallback = document.getElementById('reportCopyFallback');
+            let copied = false;
+            try {
+                if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(text); copied = true; }
+            } catch (e) { /* 尝试离线/旧浏览器复制方式 */ }
+            if (!copied) {
+                const helper = document.createElement('textarea');
+                helper.value = text;
+                helper.style.cssText = 'position:fixed;left:-9999px;top:0';
+                document.body.appendChild(helper);
+                const focused = document.activeElement;
+                helper.select();
+                try { copied = document.execCommand('copy'); } catch (e) { /* 显示手动复制文本 */ }
+                helper.remove();
+                focused?.focus({ preventScroll: true });
+            }
+            fallback.hidden = copied;
+            if (!copied) { fallback.value = text; fallback.focus(); fallback.select(); }
+            showToast(copied ? '本次成绩与答题情况已复制' : '复制未获允许，请复制下方已选中的文本');
+        }
+
         function showReport(report) {
+            activeReport = report;
             const container = document.getElementById('reportContent');
             const config = report.config;
             const total = report.totalQuestions;
@@ -3060,7 +3314,7 @@
 
             // 正确率显示
             const savedCorrect = report.correctCount;
-            const accuracyVal = (savedCorrect !== null && savedCorrect !== undefined) ? (savedCorrect / answered * 100).toFixed(1) : null;
+            const accuracyVal = (savedCorrect !== null && savedCorrect !== undefined) ? (answered > 0 ? savedCorrect / answered * 100 : 0).toFixed(1) : null;
             const accuracyHtml = accuracyVal !== null
                 ? `<div class="accuracy-display">${accuracyVal}%</div>`
                 : `<div class="accuracy-display accuracy-empty">请填写答对题数</div>`;
@@ -3069,6 +3323,7 @@
                 <!-- 概要统计 -->
                 <div class="report-card">
                     <h4>考试概况</h4>
+                    <p class="config-hint" style="margin-bottom:12px">${escapeReportText(getReportName(config))}</p>
                     <div class="report-stat-grid">
                         <div class="report-stat-item">
                             <div class="stat-num">${formatTime(report.totalTime)}</div>
@@ -3093,7 +3348,7 @@
                 </div>
 
                 <!-- 正确率 -->
-                <div class="report-card">
+                ${config.mode === 'set' ? renderReportGrading(report) : `<div class="report-card">
                     <h4>正确率</h4>
                     <div class="accuracy-input-row">
                         <span>答对</span>
@@ -3101,6 +3356,13 @@
                         <span>/ ${answered} 题</span>
                     </div>
                     ${accuracyHtml}
+                </div>`}
+
+                <div class="report-card">
+                    <h4>导出本次成绩</h4>
+                    <div class="config-hint">一键复制成绩、分板块正确率与用时、逐题作答明细。</div>
+                    <button class="btn-copy-report" id="btnCopyReport" onclick="copyCurrentReport()">一键导出本次成绩（复制）</button>
+                    <textarea class="config-input copy-fallback" id="reportCopyFallback" aria-label="本次成绩复制文本" readonly hidden></textarea>
                 </div>
 
                 <!-- 标签统计 -->
@@ -3134,21 +3396,29 @@
                 </div>
             `;
 
+            if (config.mode === 'set') bindReportGrading(report);
             showPage('page-report');
         }
 
         function onCorrectCountInput(input, maxAnswered, reportId) {
-            let val = parseInt(input.value, 10);
-            if (isNaN(val) || val < 0) val = 0;
-            if (val > maxAnswered) val = maxAnswered;
-            input.value = val;
+            const val = input.value.trim() === '' ? null : Number(input.value);
+            if (val !== null && (!Number.isInteger(val) || val < 0 || val > maxAnswered)) {
+                input.setAttribute('aria-invalid', 'true');
+                document.getElementById('btnCopyReport').disabled = true;
+                return;
+            }
+            input.setAttribute('aria-invalid', 'false');
+            document.getElementById('btnCopyReport').disabled = false;
 
             // 更新正确率显示
             const accuracyDisplay = input.closest('.report-card').querySelector('.accuracy-display');
-            if (accuracyDisplay && val >= 0) {
+            if (accuracyDisplay && val !== null) {
                 const pct = maxAnswered > 0 ? (val / maxAnswered * 100).toFixed(1) : '0.0';
                 accuracyDisplay.textContent = pct + '%';
                 accuracyDisplay.classList.remove('accuracy-empty');
+            } else if (accuracyDisplay) {
+                accuracyDisplay.textContent = '请填写答对题数';
+                accuracyDisplay.classList.add('accuracy-empty');
             }
 
             // 保存到报告
@@ -3208,9 +3478,11 @@
                     hour: '2-digit',
                     minute: '2-digit'
                 });
-                const modeText = r.config.mode === 'set' ? '套卷' : ('题型 · ' + (r.config.typeLabel || ''));
-                const hasAccuracy = r.correctCount !== null && r.correctCount !== undefined;
-                const accuracyText = hasAccuracy ? `正确率 ${(r.correctCount / answered * 100).toFixed(1)}%` : '';
+                const modeText = escapeReportText(getReportName(r.config));
+                const accuracyInfo = getReportAccuracyInfo(r);
+                const accuracyText = accuracyInfo ? `正确率 ${accuracyInfo.denominator ? (accuracyInfo.correct / accuracyInfo.denominator * 100).toFixed(1) : '0.0'}%` : '';
+                const score = r.config.mode === 'set' && r.grading ? getReportScore(r) : null;
+                const scoreText = score?.complete ? `估分 ${score.knownScore.toFixed(2)}/${score.fullScore.toFixed(2)}` : '';
                 html += `
                     <div class="history-item" onclick="viewReportByIndex(${idx})">
                         <div class="history-item-header">
@@ -3220,6 +3492,7 @@
                         <div class="history-item-stats">
                             <span>${answered}/${total} 题</span>
                             ${accuracyText ? `<span style="color:var(--green)">${accuracyText}</span>` : ''}
+                            ${scoreText ? `<span>${scoreText}</span>` : ''}
                             <span>用时 ${formatTime(r.totalTime || 0)}</span>
                             <button class="history-delete" onclick="event.stopPropagation();deleteReport(${idx})">删除</button>
                         </div>
@@ -3324,6 +3597,7 @@
 
             let totalAnswered = 0;
             let totalCorrect = 0;
+            let accuracyDenominator = 0;
             let accuracyCount = 0; // 有正确率数据的报告数
             const labelStats = {};
             for (const label of LABELS) {
@@ -3337,8 +3611,10 @@
                 totalAnswered += answered;
 
                 // 收集正确率数据
-                if (r.correctCount !== null && r.correctCount !== undefined) {
-                    totalCorrect += r.correctCount;
+                const info = getReportAccuracyInfo(r);
+                if (info) {
+                    totalCorrect += info.correct;
+                    accuracyDenominator += info.denominator;
                     accuracyCount++;
                 }
 
@@ -3365,7 +3641,7 @@
             }
 
             // 计算总体正确率
-            const overallAccuracy = accuracyCount > 0 ? (totalCorrect / totalAnswered * 100).toFixed(1) : null;
+            const overallAccuracy = accuracyCount > 0 ? (accuracyDenominator > 0 ? totalCorrect / accuracyDenominator * 100 : 0).toFixed(1) : null;
 
             let summaryHtml = '';
             summaryHtml += '<div class="stats-summary">';
