@@ -835,6 +835,20 @@
             box-shadow: 0 0 0 2px var(--accent-glow);
             color: var(--accent-text);
         }
+        .answer-section-title {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin: 10px 0 2px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .answer-section-title span { font-size: 11px; color: var(--text-secondary); font-weight: 400; }
+        .answer-grid-item { padding: 0; font-family: inherit; }
 
         .modal-footer {
             display: flex;
@@ -953,6 +967,39 @@
         #page-report {
             padding: 24px 20px;
             align-items: center;
+        }
+        #reportContent { width: 100%; max-width: 1180px; display: grid; gap: 14px; }
+        #reportContent > .report-card { max-width: none; margin: 0; min-width: 0; }
+        #page-report .report-back { max-width: 1180px; width: 100%; margin-bottom: 12px; }
+        #page-report .report-actions { margin-top: 14px; }
+        .report-type-metrics { margin-top: 6px; font-size: 12px; color: var(--text-secondary); line-height: 1.8; }
+        .report-details-tables { display: grid; gap: 18px; align-items: start; }
+        .report-details-tables > :only-child { grid-column: 1 / -1; }
+        .report-table caption { padding: 0 0 10px; text-align: left; font-size: 12px; color: var(--text-secondary); }
+        .grade-dialog {
+            position: fixed; inset: 0; margin: auto;
+            width: min(720px, calc(100% - 24px)); max-height: 90dvh;
+            border: 1px solid var(--border); border-radius: 16px;
+            padding: 18px; background: var(--bg-card); color: var(--text-primary);
+            overflow-y: auto; overscroll-behavior: contain; box-shadow: var(--shadow-card);
+        }
+        .grade-dialog::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(6px); }
+        .grade-dialog .modal-header { margin-bottom: 12px; }
+        .grade-dialog #reportGrading { padding: 0; margin: 0; max-width: none; border: none; box-shadow: none; }
+        .grade-dialog .grade-done { position: sticky; bottom: -18px; background: var(--bg-card); padding: 12px 0 6px; }
+        .grade-dialog .grade-done button { margin-top: 0; }
+        @media (min-width: 720px) {
+            #reportContent { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            #reportContent > .report-export-card,
+            #reportContent > .report-types-card,
+            #reportContent > .report-details-card { grid-column: 1 / -1; }
+            #reportTypeStats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            #reportContent > .report-card { padding: 18px; }
+            #reportTypeStats .report-stat-item { padding: 12px 10px; }
+            .report-details-tables { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            #answerSheetModal .modal-content { max-width: 940px; margin: 0 auto; bottom: 24px; border-radius: 20px; }
+            .grade-dialog { padding: 24px; }
+            .grade-dialog .grade-done { bottom: -24px; }
         }
         .report-title {
             font-family: "DM Serif Display", "Noto Serif SC", serif;
@@ -1799,6 +1846,15 @@
             </div>
         </div>
 
+        <dialog id="reportGradeDialog" class="grade-dialog" aria-labelledby="reportGradeTitle">
+            <div class="modal-header">
+                <h3 id="reportGradeTitle">录入成绩</h3>
+                <button class="modal-close" onclick="closeReportGrading()">关闭</button>
+            </div>
+            <div id="reportGradeBody"></div>
+            <div class="grade-done"><button class="btn-copy-report" onclick="closeReportGrading()">完成并返回报告</button></div>
+        </dialog>
+
         <!-- ==================== Submit Page ==================== -->
         <div id="page-submit" class="page">
             <button class="page-back-btn" style="max-width:500px;width:100%;margin-bottom:16px" onclick="goBackToExam()">&larr; 返回答题</button>
@@ -1813,7 +1869,7 @@
 
         <!-- ==================== Report Page ==================== -->
         <div id="page-report" class="page">
-            <button class="page-back-btn" style="max-width:680px;width:100%;margin-bottom:12px" onclick="goHome()">&larr; 返回首页</button>
+            <button class="page-back-btn report-back" onclick="goHome()">&larr; 返回首页</button>
             <div class="report-title">答题报告</div>
             <div id="reportContent"></div>
             <div class="report-actions">
@@ -2089,6 +2145,7 @@
         // ================================================================
 
         function showPage(pageId) {
+            if (pageId !== 'page-report') closeReportGrading();
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
             // 关闭可能打开的 modal
@@ -2834,7 +2891,21 @@
             const grid = document.getElementById('answerGrid');
             grid.innerHTML = '';
             for (let i = 1; i <= total; i++) {
-                const item = document.createElement('div');
+                const label = getLabelForQuestion(i, p.config) || '未分类';
+                if (p.config.mode === 'set' && (i === 1 || label !== (getLabelForQuestion(i - 1, p.config) || '未分类'))) {
+                    let end = i;
+                    while (end < total && (getLabelForQuestion(end + 1, p.config) || '未分类') === label) end++;
+                    const title = document.createElement('h4');
+                    title.className = 'answer-section-title';
+                    title.style.color = LABEL_COLORS[label] || 'var(--text-heading)';
+                    title.innerHTML = `${escapeReportText(label)}<span>第 ${i}–${end} 题</span>`;
+                    grid.appendChild(title);
+                }
+                const item = document.createElement('button');
+                item.type = 'button';
+                item.dataset.question = i;
+                item.setAttribute('aria-label', `第 ${i} 题 · ${label}${p.answers[i] ? ' · 已答' : ''}`);
+                if (i === p.currentQuestion) item.setAttribute('aria-current', 'true');
                 item.className = 'answer-grid-item';
                 if (p.answers[i]) item.classList.add('answered');
                 if (i === p.currentQuestion) item.classList.add('current');
@@ -3116,7 +3187,6 @@
                 <h4>分板块正确率与成绩</h4>
                 <div class="config-hint">填写答对题数或正确率，按各板块总题数计算，未答按错题计入。百分比录入仅用于估分，不推断逐题对错。留空表示未录入。</div>
                 ${Number.isFinite(report.correctCount) ? `<div class="config-hint">旧版总记录：答对 ${report.correctCount}/${Object.keys(report.answers || {}).length} 题。请分别录入各板块后计算成绩。</div>` : ''}
-                <div class="score-summary" id="reportScoreSummary" aria-live="polite"></div>
                 ${rows}
                 <details style="margin-top:12px"><summary class="config-hint">查看计分依据与说明</summary>
                     <p class="config-hint">${escapeReportText(report.grading.name)}。${escapeReportText(report.grading.note)} 这是练习参考估分，不是官方成绩。修改单题分值后，满分按各板块题量 × 单题分值重新计算，同时提供百分制换算。</p>
@@ -3131,6 +3201,37 @@
             });
             updateReportGradeDisplay(report);
         }
+
+        function openReportGrading() {
+            if (!activeReport || activeReport.config.mode !== 'set') return;
+            const dialog = document.getElementById('reportGradeDialog');
+            if (dialog.open) return;
+            document.getElementById('reportGradeBody').innerHTML = renderReportGrading(activeReport);
+            bindReportGrading(activeReport);
+            dialog.showModal();
+            dialog.scrollTop = 0;
+            dialog.querySelector('input')?.focus({ preventScroll: true });
+        }
+
+        function closeReportGrading() {
+            const dialog = document.getElementById('reportGradeDialog');
+            if (!dialog || !dialog.open) return;
+            const invalid = dialog.querySelector('[aria-invalid="true"]');
+            dialog.close();
+            document.getElementById('reportGradeBody').replaceChildren();
+            if (activeReport?.config.mode === 'set' && document.getElementById('reportScoreSummary')) updateReportGradeDisplay(activeReport);
+            if (invalid) showToast('无效输入未保存，其余成绩已保存');
+        }
+
+        document.getElementById('reportGradeDialog').addEventListener('cancel', event => {
+            event.preventDefault();
+            closeReportGrading();
+        });
+        document.getElementById('reportGradeDialog').addEventListener('click', event => {
+            if (event.target !== event.currentTarget) return;
+            const rect = event.currentTarget.getBoundingClientRect();
+            if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) closeReportGrading();
+        });
 
         function onSectionGradeInput(input, report) {
             const sections = getReportSections(report);
@@ -3174,6 +3275,7 @@
         }
 
         function updateReportGradeDisplay(report) {
+            ensureReportGrading(report);
             const score = getReportScore(report);
             const invalid = document.querySelector('#reportGrading [aria-invalid="true"]');
             const summary = document.getElementById('reportScoreSummary');
@@ -3183,9 +3285,13 @@
             if (report.grading.customized) summary.innerHTML += '<div class="config-hint">已自定义单题分值</div>';
             document.querySelectorAll('#reportGrading .score-section').forEach((row, i) => {
                 const s = score.details[i];
-                row.querySelector('.score-section-detail').textContent = `${s.valid ? '参考得分 ' + s.score.toFixed(2) : '正确率未录入'} / ${s.maxScore.toFixed(2)} 分 · 用时 ${formatTimeShort(s.time)} · 已答题均时 ${s.answered ? formatTimeShort(s.time / s.answered) : '—'}`;
+                row.querySelector('.score-section-detail').textContent = `板块满分 ${s.maxScore.toFixed(2)} 分 · ${s.total} 题`;
             });
             document.getElementById('btnCopyReport').disabled = Boolean(invalid);
+            const entry = document.getElementById('btnEditReportGrade');
+            if (entry) entry.textContent = score.complete ? '修改成绩' : (score.entered ? '继续录入成绩' : '录入成绩');
+            const stats = document.getElementById('reportTypeStats');
+            if (stats) stats.innerHTML = renderReportTypeStats(report);
         }
 
         function buildReportExportText(report) {
@@ -3212,7 +3318,7 @@
 
         async function copyCurrentReport() {
             if (!activeReport) return;
-            if (document.querySelector('#reportContent [aria-invalid="true"]')) { showToast('请先修正成绩输入'); return; }
+            if (document.querySelector('#reportContent [aria-invalid="true"], #reportGrading [aria-invalid="true"]')) { showToast('请先修正成绩输入'); return; }
             const text = buildReportExportText(activeReport);
             const fallback = document.getElementById('reportCopyFallback');
             let copied = false;
@@ -3235,7 +3341,61 @@
             showToast(copied ? '本次成绩与答题情况已复制' : '复制未获允许，请复制下方已选中的文本');
         }
 
+        function renderReportTypeStats(report) {
+            const isSet = report.config.mode === 'set';
+            const sections = isSet ? getReportScore(report).details : getReportSections(report);
+            const info = !isSet ? getReportAccuracyInfo(report) : null;
+            return sections.map(s => {
+                const rate = isSet ? (s.valid ? s.accuracy.toFixed(2) + '%' : '未录入')
+                    : (info ? (info.denominator ? info.correct / info.denominator * 100 : 0).toFixed(2) + '%' : '未录入');
+                return `<div class="report-stat-item" data-stat-section="${escapeReportText(s.name)}">
+                    <div class="stat-num" style="font-size:16px;color:${LABEL_COLORS[s.name] || 'var(--text-heading)'}">${escapeReportText(s.name)}</div>
+                    <div class="report-type-metrics">已答 ${s.answered}/${s.total} 题<br>
+                        正确率 ${rate}${isSet ? '<br>参考得分 ' + (s.valid ? s.score.toFixed(2) : '—') + ' / ' + s.maxScore.toFixed(2) + '&nbsp;分' : ''}<br>
+                        用时 ${formatTimeShort(s.time)}<br>已答题均时 ${s.answered ? formatTimeShort(s.time / s.answered) : '—'}
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderReportDetails(report) {
+            const total = report.totalQuestions || getTotalQuestions(report.config);
+            const grouped = report.config.mode === 'type' && report.config.typeLabel === '资料分析';
+            let middle = Math.ceil(total / 2);
+            // 每五题一组的资料分析，保持完整材料组落在同一张表内。
+            if (grouped) middle = Math.min(total, Math.ceil(Math.ceil(total / 5) / 2) * 5);
+            const ranges = window.matchMedia('(min-width: 720px)').matches && middle < total
+                ? [[1, middle], [middle + 1, total]] : [[1, total]];
+            return ranges.map(([start, end]) => {
+                let rows = '';
+                for (let q = start; q <= end; q++) {
+                    if (grouped && (q - 1) % 5 === 0) {
+                        const last = Math.min(q + 4, total);
+                        let time = 0, answered = 0;
+                        for (let g = q; g <= last; g++) { time += report.questionTimes?.[g] || 0; if (report.answers?.[g]) answered++; }
+                        rows += `<tr class="group-header-row"><td colspan="4">第${q}-${last}题 · ${answered}题已答 · 总${formatTimeShort(time)} · 均${answered ? formatTimeShort(time / answered) : '—'}</td></tr>`;
+                    }
+                    const label = getLabelForQuestion(q, report.config);
+                    const answer = report.answers?.[q] || '-';
+                    rows += `<tr data-question="${q}"><td>${q}</td>
+                        <td>${label ? `<span class="label-tag" style="background:${LABEL_COLORS[label] || 'var(--text-muted)'}">${escapeReportText(label)}</span>` : '-'}</td>
+                        <td style="font-weight:${answer !== '-' ? '600' : '400'};color:${answer !== '-' ? 'var(--accent-text)' : 'var(--text-muted)'}">${escapeReportText(answer)}</td>
+                        <td>${formatTimeShort(report.questionTimes?.[q] || 0)}</td></tr>`;
+                }
+                return `<div class="report-table-wrap"><table class="report-table" aria-label="第 ${start}–${end} 题详情">
+                    ${ranges.length > 1 ? `<caption>第 ${start}–${end} 题</caption>` : ''}
+                    <thead><tr><th>题号</th><th>题型</th><th>答案</th><th>用时</th></tr></thead><tbody>${rows}</tbody>
+                </table></div>`;
+            }).join('');
+        }
+
+        window.matchMedia('(min-width: 720px)').addEventListener('change', () => {
+            const tables = document.getElementById('reportDetailsTables');
+            if (activeReport && tables) tables.innerHTML = renderReportDetails(activeReport);
+        });
+
         function showReport(report) {
+            closeReportGrading();
             activeReport = report;
             const container = document.getElementById('reportContent');
             const config = report.config;
@@ -3244,73 +3404,7 @@
             const unanswered = total - answered;
             const answeredRate = total > 0 ? (answered / total * 100).toFixed(1) : 0;
 
-            // 按标签统计
-            const labelStats = {};
-            for (let i = 1; i <= total; i++) {
-                const label = getLabelForQuestion(i, config);
-                if (!label) continue;
-                if (!labelStats[label]) {
-                    labelStats[label] = { total: 0, answered: 0, totalTime: 0 };
-                }
-                labelStats[label].total++;
-                if (report.answers[i]) {
-                    labelStats[label].answered++;
-                }
-                labelStats[label].totalTime += (report.questionTimes[i] || 0);
-            }
-
-            let labelHtml = '';
-            for (const [name, stats] of Object.entries(labelStats)) {
-                const avgTime = stats.answered > 0 ? stats.totalTime / stats.answered : 0;
-                labelHtml += `
-                    <div class="report-stat-item">
-                        <div class="stat-num" style="font-size:18px;color:${LABEL_COLORS[name] || 'var(--text-muted)'}">${name}</div>
-                        <div style="font-size:13px;color:var(--text-secondary);margin-top:2px">
-                            ${stats.answered}/${stats.total} 题
-                        </div>
-                        <div style="font-size:11px;color:var(--text-muted);margin-top:1px">
-                            总 ${formatTimeShort(stats.totalTime)}
-                            ${stats.answered > 0 ? ' · 均 ' + formatTimeShort(avgTime) : ''}
-                        </div>
-                    </div>
-                `;
-            }
-
-            // 每题明细表
-            // 题型模式 + 资料分析：每五题分组
-            const isTypeZiliao = config.mode === 'type' && config.typeLabel === '资料分析';
-            let tableRows = '';
-            for (let i = 1; i <= total; i++) {
-                // 资料分析分组：每组开头插入分组行
-                if (isTypeZiliao && (i - 1) % 5 === 0) {
-                    const groupStart = i;
-                    const groupEnd = Math.min(i + 4, total);
-                    let groupTotalTime = 0;
-                    let groupAnswered = 0;
-                    for (let g = groupStart; g <= groupEnd; g++) {
-                        groupTotalTime += (report.questionTimes[g] || 0);
-                        if (report.answers[g]) groupAnswered++;
-                    }
-                    const groupAvgTime = groupAnswered > 0 ? groupTotalTime / groupAnswered : 0;
-                    tableRows += `
-                        <tr class="group-header-row">
-                            <td colspan="4" style="font-variant-numeric:tabular-nums">第${groupStart}-${groupEnd}题 · ${groupAnswered}题已答 · 总${formatTimeShort(groupTotalTime)} · 均${formatTimeShort(groupAvgTime)}</td>
-                        </tr>
-                    `;
-                }
-                const label = getLabelForQuestion(i, config);
-                const ans = report.answers[i] || '-';
-                const time = report.questionTimes[i] || 0;
-                const color = label ? LABEL_COLORS[label] : 'transparent';
-                tableRows += `
-                    <tr>
-                        <td>${i}</td>
-                        <td>${label ? `<span class="label-tag" style="background:${color}">${label}</span>` : '-'}</td>
-                        <td style="font-weight:${ans !== '-' ? '600' : '400'};color:${ans !== '-' ? 'var(--accent-text)' : 'var(--text-muted)'}">${ans}</td>
-                        <td style="font-variant-numeric:tabular-nums">${formatTimeShort(time)}</td>
-                    </tr>
-                `;
-            }
+            if (config.mode === 'set') ensureReportGrading(report);
 
             // 正确率显示
             const savedCorrect = report.correctCount;
@@ -3321,7 +3415,7 @@
 
             container.innerHTML = `
                 <!-- 概要统计 -->
-                <div class="report-card">
+                <div class="report-card report-overview-card">
                     <h4>考试概况</h4>
                     <p class="config-hint" style="margin-bottom:12px">${escapeReportText(getReportName(config))}</p>
                     <div class="report-stat-grid">
@@ -3348,7 +3442,11 @@
                 </div>
 
                 <!-- 正确率 -->
-                ${config.mode === 'set' ? renderReportGrading(report) : `<div class="report-card">
+                ${config.mode === 'set' ? `<div class="report-card report-score-card">
+                    <h4>本次成绩</h4>
+                    <div class="score-summary" id="reportScoreSummary" aria-live="polite"></div>
+                    <button class="btn-copy-report" id="btnEditReportGrade" onclick="openReportGrading()" aria-haspopup="dialog" aria-controls="reportGradeDialog">录入成绩</button>
+                </div>` : `<div class="report-card report-score-card">
                     <h4>正确率</h4>
                     <div class="accuracy-input-row">
                         <span>答对</span>
@@ -3358,7 +3456,7 @@
                     ${accuracyHtml}
                 </div>`}
 
-                <div class="report-card">
+                <div class="report-card report-export-card">
                     <h4>导出本次成绩</h4>
                     <div class="config-hint">一键复制成绩、分板块正确率与用时、逐题作答明细。</div>
                     <button class="btn-copy-report" id="btnCopyReport" onclick="copyCurrentReport()">一键导出本次成绩（复制）</button>
@@ -3366,37 +3464,23 @@
                 </div>
 
                 <!-- 标签统计 -->
-                ${Object.keys(labelStats).length > 0 ? `
-                <div class="report-card">
+                <div class="report-card report-types-card">
                     <h4>分题型统计</h4>
-                    <div class="report-stat-grid">
-                        ${labelHtml}
+                    <div class="report-stat-grid" id="reportTypeStats">
+                        ${renderReportTypeStats(report)}
                     </div>
                 </div>
-                ` : ''}
 
                 <!-- 每题明细 -->
-                <div class="report-card">
+                <div class="report-card report-details-card">
                     <h4>每题详情</h4>
-                    <div class="report-table-wrap">
-                        <table class="report-table">
-                            <thead>
-                                <tr>
-                                    <th>题号</th>
-                                    <th>题型</th>
-                                    <th>答案</th>
-                                    <th>用时</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${tableRows}
-                            </tbody>
-                        </table>
+                    <div class="report-details-tables" id="reportDetailsTables">
+                        ${renderReportDetails(report)}
                     </div>
                 </div>
             `;
 
-            if (config.mode === 'set') bindReportGrading(report);
+            if (config.mode === 'set') updateReportGradeDisplay(report);
             showPage('page-report');
         }
 
@@ -3427,6 +3511,7 @@
             if (report) {
                 report.correctCount = val;
                 saveState();
+                document.getElementById('reportTypeStats').innerHTML = renderReportTypeStats(report);
             }
         }
 

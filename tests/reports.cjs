@@ -39,6 +39,10 @@ async function main() {
                 saveState();
                 showReport(report);
             }, { preset, options });
+            assert.equal(await page.locator('#reportGradeDialog').evaluate(dialog => dialog.open), false);
+            assert.equal(await page.locator('#reportContent .section-accuracy').count(), 0);
+            await page.locator('#btnEditReportGrade').click();
+            assert.equal(await page.locator('#reportGradeDialog').evaluate(dialog => dialog.open), true);
         }
         async function fillAllRates(rate) {
             const inputs = page.locator('.section-accuracy');
@@ -96,11 +100,18 @@ async function main() {
         assert.equal(score.percentScore, 50);
         await page.reload();
         await page.evaluate(() => viewReportByIndex(0));
+        await page.locator('#btnEditReportGrade').click();
         assert.equal(await page.locator('.section-points').first().inputValue(), '1');
         assert.equal(await firstRate.inputValue(), '50');
         assert.match(await page.locator('#reportScoreSummary').innerText(), /已自定义/);
         console.log('PASS: count/rate conversion, zero/blank, validation, custom points and persistence');
 
+        await page.getByRole('button', { name: '完成并返回报告' }).click();
+        assert.equal(await page.locator('#reportGradeDialog').evaluate(dialog => dialog.open), false);
+        assert.match(await page.locator('[data-stat-section="政治理论"]').innerText(), /正确率 50.00%/);
+        assert.match(await page.locator('[data-stat-section="政治理论"]').innerText(), /参考得分 10.00 \/ 20.00\s分/);
+        assert.match(await page.locator('[data-stat-section="政治理论"]').innerText(), /已答题均时 1.0s/);
+        assert.equal(await page.locator('#btnEditReportGrade').innerText(), '修改成绩');
         await page.locator('#btnCopyReport').click();
         const copied = await page.evaluate(() => navigator.clipboard.readText());
         assert.match(copied, /国考-行政执法/);
@@ -152,6 +163,7 @@ async function main() {
             report.correctCount = null;
             showReport(report);
         });
+        await page.locator('#btnEditReportGrade').click();
         assert.equal(await page.locator('.score-section').count(), 2);
         assert.match(await page.locator('#reportGrading').innerText(), /未分类/);
         await fillAllRates(100);
@@ -164,12 +176,15 @@ async function main() {
 
         await makeReport('national-provincial');
         await fillAllRates(80);
+        await page.getByRole('button', { name: '完成并返回报告' }).click();
         for (const width of [320, 390, 1280]) {
             await page.setViewportSize({ width, height: 844 });
             assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+            await page.locator('#btnEditReportGrade').click();
             const box = await page.locator('.score-section').first().boundingBox();
             const inputBoxes = await page.locator('.score-section').first().locator('input').evaluateAll(inputs => inputs.map(i => ({ left: i.getBoundingClientRect().left, right: i.getBoundingClientRect().right })));
             for (const input of inputBoxes) assert.ok(input.left >= box.x && input.right <= box.x + box.width + 1);
+            await page.getByRole('button', { name: '完成并返回报告' }).click();
         }
         if (process.env.CLOCKCLOCK_REPORT_SCREENSHOT) {
             await page.setViewportSize({ width: 390, height: 844 });
@@ -177,7 +192,7 @@ async function main() {
                 document.activeElement?.blur();
                 document.getElementById('toast').style.display = 'none';
                 const panel = document.getElementById('page-report');
-                panel.scrollTop += document.getElementById('reportGrading').getBoundingClientRect().top - 20;
+                panel.scrollTop = 0;
             });
             await page.screenshot({ path: process.env.CLOCKCLOCK_REPORT_SCREENSHOT });
         }
