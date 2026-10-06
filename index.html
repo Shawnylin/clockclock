@@ -333,6 +333,14 @@
             border-color: var(--accent);
             box-shadow: 0 0 0 3px var(--accent-glow);
         }
+        .config-hint {
+            margin-top: 6px;
+            font-size: 12px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+        .config-hint a { color: var(--accent-text); }
+        .config-error { color: var(--red); }
         .config-input[type="number"] {
             -moz-appearance: textfield;
             font-family: "JetBrains Mono", monospace;
@@ -1676,12 +1684,25 @@
             <!-- 套卷模式配置 -->
             <div id="config-set" class="config-panel">
                 <div class="config-group">
+                    <label class="config-label" for="paperPreset">选择套卷</label>
+                    <select class="config-input" id="paperPreset" onchange="onPaperPresetChange()">
+                        <option value="national-provincial">国考-副省级</option>
+                        <option value="national-enforcement">国考-行政执法</option>
+                        <option value="guangdong">广东-省考</option>
+                        <option value="tianjin">天津-市考</option>
+                        <option value="custom">自定义</option>
+                    </select>
+                    <div class="config-hint" id="paperPresetHint"></div>
+                </div>
+                <div class="config-group">
                     <label class="config-label" for="totalQuestions">总题数</label>
-                    <input class="config-input" type="number" id="totalQuestions" value="120" min="1" max="300" oninput="onConfigChange()">
+                    <input class="config-input" type="number" id="totalQuestions" value="135" min="1" max="300" oninput="onSetConfigChange()">
                 </div>
                 <div class="config-group">
                     <label class="config-label">题号区间与标签</label>
                     <div id="labelRanges"></div>
+                    <div class="config-hint">区间包含起止题号；设为 0–0 可停用该板块。修改预设后自动转为自定义。</div>
+                    <div class="config-hint config-error" id="setConfigError" role="status"></div>
                 </div>
             </div>
 
@@ -1889,15 +1910,54 @@
         //  CONSTANTS & CONFIG
         // ================================================================
 
-        const LABELS = ['常识判断', '政治理论', '言语理解', '判断推理', '资料分析'];
+        const LABELS = ['政治理论', '常识判断', '言语理解', '数量关系', '判断推理', '资料分析'];
         const LABEL_COLORS = {
             '常识判断': '#3b82f6',
             '政治理论': '#ef4444',
             '言语理解': '#10b981',
+            '数量关系': '#0891b2',
             '判断推理': '#f59e0b',
             '资料分析': '#8b5cf6'
         };
         const LABEL_ORDER = LABELS; // 预设顺序
+
+        // 2026 年真题回忆版的板块边界；来源及核对说明见 README.md。
+        // 广东卷的科学推理（66–70）归入判断推理。
+        const PAPER_PRESETS = {
+            'national-provincial': {
+                year: 2026, totalQuestions: 135,
+                ranges: [[1, 20], [21, 35], [36, 65], [66, 80], [81, 115], [116, 135]],
+                source: 'https://www.cgzj.com/gk/4041.html',
+                note: ''
+            },
+            'national-enforcement': {
+                year: 2026, totalQuestions: 130,
+                ranges: [[1, 20], [21, 35], [36, 65], [66, 75], [76, 110], [111, 130]],
+                source: 'https://oss-hqwx-video.hqwx.com/2026-国考真题《行测》（行政执法）-真题及答案（网友回忆）_809ff87895cb06a602d28db5b67255f19ff25f6f.pdf',
+                note: ''
+            },
+            'guangdong': {
+                year: 2026, totalQuestions: 90,
+                ranges: [[1, 10], [11, 15], [16, 30], [31, 45], [46, 70], [71, 90]],
+                source: 'https://www.eoffcn.com/kszx/detail/1918992.html',
+                note: '判断推理含科学推理（66–70 题）。'
+            },
+            'tianjin': {
+                year: 2026, totalQuestions: 120,
+                ranges: [[1, 15], [16, 25], [26, 50], [51, 65], [66, 100], [101, 120]],
+                source: 'https://upload.xingguanggongkao.com/pdf/2026年天津市公务员录用考试《行测》真题（考生回忆版）.pdf',
+                note: ''
+            }
+        };
+
+        function getPresetConfig(presetId) {
+            const preset = PAPER_PRESETS[presetId];
+            return {
+                mode: 'set', preset: presetId, presetYear: preset.year,
+                totalQuestions: preset.totalQuestions,
+                labels: LABEL_ORDER.map((name, i) => ({ name, start: preset.ranges[i][0], end: preset.ranges[i][1] }))
+            };
+        }
 
         const STORAGE_KEY = 'exam_timer_data';
         const SW_CACHE_KEY = 'exam-timer-v1';
@@ -1918,7 +1978,8 @@
         /**
          * appState 结构：
          * {
-         *   config: { mode, totalQuestions, labels, typeLabel, typeCount },
+         *   config: { mode, preset, presetYear, totalQuestions, labels, typeLabel, typeCount },
+         *   setConfig: { ... },          // 独立保存的套卷草稿
          *   // progress 存在 = 正在进行或已完成的考试
          *   progress: {
          *     config: { ... },           // 存档时的 config 快照
@@ -1938,6 +1999,7 @@
          */
         let appState = {
             config: null,
+            setConfig: null, // 套卷草稿，切换到题型模式后仍保留
             progress: null,
             reports: []
         };
@@ -1960,6 +2022,7 @@
                 if (raw) {
                     const parsed = JSON.parse(raw);
                     appState.config = parsed.config || null;
+                    appState.setConfig = parsed.setConfig || null;
                     appState.progress = parsed.progress || null;
                     appState.reports = parsed.reports || [];
                     return true;
@@ -2070,7 +2133,7 @@
             indicator.style.width = btnRect.width + 'px';
         }
 
-        function switchMode(mode) {
+        function switchMode(mode, persist = true) {
             currentMode = mode;
             let activeBtn = null;
             document.querySelectorAll('.mode-btn').forEach(b => {
@@ -2081,35 +2144,27 @@
             document.getElementById('config-set').classList.toggle('hidden', mode !== 'set');
             document.getElementById('config-type').classList.toggle('hidden', mode !== 'type');
             requestAnimationFrame(() => updateModeIndicator(activeBtn));
-            onConfigChange();
+            if (persist) onConfigChange();
         }
 
         function renderHomeConfig() {
-            // 初始化套卷模式的标签区间
-            renderLabelRanges();
+            const c = appState.config;
+            const setConfig = appState.setConfig || (c && c.mode === 'set' ? c : getPresetConfig('national-provincial'));
+            document.getElementById('totalQuestions').value = setConfig.totalQuestions;
+            document.getElementById('paperPreset').value = PAPER_PRESETS[setConfig.preset] ? setConfig.preset : 'custom';
+            // 按题型名称恢复，兼容新增数量关系之前的五板块配置。
+            renderLabelRanges(setConfig.labels);
+            renderPaperPresetHint();
 
             // 初始化题型模式的标签选择器
             renderTypeLabels();
 
             // 如果之前有 config，恢复值
-            if (appState.config) {
-                const c = appState.config;
+            if (c) {
                 if (c.mode === 'set') {
-                    switchMode('set');
-                    document.getElementById('totalQuestions').value = c.totalQuestions;
-                    // 恢复区间值
-                    const rows = document.querySelectorAll('.label-range-row');
-                    c.labels.forEach((l, i) => {
-                        if (i < rows.length) {
-                            const inputs = rows[i].querySelectorAll('input');
-                            if (inputs.length >= 2) {
-                                inputs[0].value = l.start;
-                                inputs[1].value = l.end;
-                            }
-                        }
-                    });
+                    switchMode('set', false);
                 } else {
-                    switchMode('type');
+                    switchMode('type', false);
                     // 选中对应的题型按钮，并更新行内样式
                     document.querySelectorAll('.type-label-btn').forEach(b => {
                         const isActive = b.dataset.label === c.typeLabel;
@@ -2127,6 +2182,7 @@
                     document.getElementById('typeCount').value = c.typeCount;
                 }
             } else {
+                switchMode('set', false);
                 // 默认选中第一个题型
                 const firstLabel = document.querySelector('.type-label-btn');
                 if (firstLabel) firstLabel.classList.add('active');
@@ -2139,20 +2195,22 @@
             if (activeModeBtn) requestAnimationFrame(() => updateModeIndicator(activeModeBtn));
         }
 
-        function renderLabelRanges() {
+        function renderLabelRanges(labels) {
             const container = document.getElementById('labelRanges');
             container.innerHTML = '';
-            LABEL_ORDER.forEach((name, idx) => {
+            LABEL_ORDER.forEach(name => {
                 const row = document.createElement('div');
                 row.className = 'label-range-row';
-                const defaultStart = idx * 24 + 1;
-                const defaultEnd = Math.min((idx + 1) * 24, 120);
+                row.dataset.label = name;
+                const range = (labels || []).find(label => label.name === name);
+                const defaultStart = range ? range.start : 0;
+                const defaultEnd = range ? range.end : 0;
                 row.innerHTML = `
                     <span class="label-range-name" style="color:${LABEL_COLORS[name]}">${name}</span>
                     <div class="label-range-inputs">
-                        <input type="number" class="lr-start" value="${defaultStart}" min="0" max="300" oninput="onConfigChange()">
+                        <input type="number" class="lr-start" aria-label="${name}起始题号" value="${defaultStart}" min="0" max="300" oninput="onSetConfigChange()">
                         <span>—</span>
-                        <input type="number" class="lr-end" value="${defaultEnd}" min="0" max="300" oninput="onConfigChange()">
+                        <input type="number" class="lr-end" aria-label="${name}结束题号" value="${defaultEnd}" min="0" max="300" oninput="onSetConfigChange()">
                     </div>
                 `;
                 container.appendChild(row);
@@ -2191,52 +2249,91 @@
         function onConfigChange() {
             const btn = document.getElementById('btnStart');
             btn.disabled = !isConfigValid();
+            document.getElementById('setConfigError').textContent = getSetConfigError();
+            if (currentMode === 'set') appState.setConfig = getConfig();
+            appState.config = getConfig();
+            saveState();
+        }
+
+        function renderPaperPresetHint() {
+            const preset = PAPER_PRESETS[document.getElementById('paperPreset').value];
+            document.getElementById('paperPresetHint').innerHTML = preset
+                ? `${preset.year} 年行测 · ${preset.totalQuestions} 题 · 按公开真题回忆版预设。${preset.note} <a href="${preset.source}" target="_blank" rel="noopener noreferrer">查看来源</a>`
+                : '自行设置总题数和各板块题号区间。';
+        }
+
+        function onPaperPresetChange() {
+            const presetId = document.getElementById('paperPreset').value;
+            if (PAPER_PRESETS[presetId]) {
+                const config = getPresetConfig(presetId);
+                document.getElementById('totalQuestions').value = config.totalQuestions;
+                renderLabelRanges(config.labels);
+            }
+            renderPaperPresetHint();
+            onConfigChange();
+        }
+
+        function onSetConfigChange() {
+            document.getElementById('paperPreset').value = 'custom';
+            renderPaperPresetHint();
+            onConfigChange();
+        }
+
+        function getSetConfigError() {
+            const total = Number(document.getElementById('totalQuestions').value);
+            if (!Number.isInteger(total) || total < 1 || total > 300) return '总题数须为 1–300 的整数。';
+            const occupied = new Set();
+            let hasActive = false;
+            for (const row of document.querySelectorAll('.label-range-row')) {
+                const inputs = row.querySelectorAll('input');
+                const start = Number(inputs[0].value);
+                const end = Number(inputs[1].value);
+                if (start === 0 && end === 0) continue;
+                if (!Number.isInteger(start) || !Number.isInteger(end) || start < 1 || end < start || end > total) {
+                    return `${row.dataset.label}区间须为 1–${total} 内的整数，且起始题号不大于结束题号。`;
+                }
+                for (let q = start; q <= end; q++) {
+                    if (occupied.has(q)) return `第 ${q} 题出现在多个板块，请调整区间。`;
+                    occupied.add(q);
+                }
+                hasActive = true;
+            }
+            return hasActive ? '' : '请至少设置一个有效的题型区间。';
         }
 
         function isConfigValid() {
             if (currentMode === 'set') {
-                const total = parseInt(document.getElementById('totalQuestions').value) || 0;
-                if (total < 1) return false;
-                // 检查区间是否有效
-                const rows = document.querySelectorAll('.label-range-row');
-                let hasActive = false;
-                for (const row of rows) {
-                    const inputs = row.querySelectorAll('input');
-                    const s = parseInt(inputs[0].value);
-                    const e = parseInt(inputs[1].value);
-                    if (s > 0 && e > 0 && s <= e) {
-                        hasActive = true;
-                    }
-                }
-                return hasActive;
+                return getSetConfigError() === '';
             } else {
                 const active = document.querySelector('.type-label-btn.active');
-                const count = parseInt(document.getElementById('typeCount').value) || 0;
-                return active !== null && count > 0;
+                const count = Number(document.getElementById('typeCount').value);
+                return active !== null && Number.isInteger(count) && count > 0 && count <= 300;
             }
         }
 
         function getConfig() {
             if (currentMode === 'set') {
-                const total = parseInt(document.getElementById('totalQuestions').value) || 120;
+                const total = Number(document.getElementById('totalQuestions').value);
                 const labels = [];
                 const rows = document.querySelectorAll('.label-range-row');
-                rows.forEach((row, idx) => {
+                rows.forEach(row => {
                     const inputs = row.querySelectorAll('input');
-                    const s = parseInt(inputs[0].value);
-                    const e = parseInt(inputs[1].value);
-                    if (s > 0 && e > 0 && s <= e) {
+                    const s = Number(inputs[0].value);
+                    const e = Number(inputs[1].value);
+                    // 保留编辑中的原值，重新打开时不丢失未完成的区间。
+                    if (s !== 0 || e !== 0) {
                         labels.push({
-                            name: LABEL_ORDER[idx],
+                            name: row.dataset.label,
                             start: s,
                             end: e
                         });
                     }
                 });
-                return { mode: 'set', totalQuestions: total, labels };
+                const preset = document.getElementById('paperPreset').value;
+                return { mode: 'set', preset, presetYear: PAPER_PRESETS[preset]?.year || null, totalQuestions: total, labels };
             } else {
                 const activeLabel = document.querySelector('.type-label-btn.active');
-                const count = parseInt(document.getElementById('typeCount').value) || 30;
+                const count = Number(document.getElementById('typeCount').value);
                 return {
                     mode: 'type',
                     typeLabel: activeLabel ? activeLabel.dataset.label : LABELS[0],
@@ -3188,6 +3285,7 @@
             if (!confirm('确定要清除所有数据吗？包括当前进度和历史记录。此操作不可恢复。')) return;
             appState.progress = null;
             appState.config = null;
+            appState.setConfig = null;
             appState.reports = [];
             saveState();
             if (timerInterval) {
@@ -3318,6 +3416,7 @@
                 appName: '考试计时器',
                 data: {
                     config: appState.config,
+                    setConfig: appState.setConfig,
                     progress: appState.progress,
                     reports: appState.reports
                 }
@@ -3362,6 +3461,7 @@
                         if (!Array.isArray(parsed.data.reports)) throw new Error('reports 字段格式错误');
 
                         appState.config = parsed.data.config || null;
+                        appState.setConfig = parsed.data.setConfig || null;
                         appState.progress = parsed.data.progress || null;
                         appState.reports = parsed.data.reports || [];
                         saveState();
