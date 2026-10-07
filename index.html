@@ -1382,6 +1382,8 @@
         }
         .history-item-stats {
             display: flex;
+            flex-wrap: wrap;
+            align-items: center;
             gap: 16px;
             font-size: 12px;
             color: var(--text-muted);
@@ -1401,6 +1403,8 @@
         }
         .history-delete {
             margin-left: auto;
+            flex-shrink: 0;
+            white-space: nowrap;
             padding: 4px 12px;
             border: 1px solid var(--red-dim);
             background: transparent;
