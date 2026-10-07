@@ -982,6 +982,7 @@
             border: 1px solid var(--border); border-radius: 16px;
             padding: 18px; background: var(--bg-card); color: var(--text-primary);
             overflow-y: auto; overscroll-behavior: contain; box-shadow: var(--shadow-card);
+            -webkit-overflow-scrolling: touch;
         }
         .grade-dialog::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(6px); }
         .grade-dialog .modal-header { margin-bottom: 12px; }
@@ -3209,14 +3210,58 @@
             bindReportGrading(activeReport);
             dialog.showModal();
             dialog.scrollTop = 0;
-            dialog.querySelector('input')?.focus({ preventScroll: true });
+            updateReportGradingViewport();
+            dialog.querySelector('.modal-close').focus({ preventScroll: true });
         }
+
+        let reportGradingViewportFrame = null;
+
+        function updateReportGradingViewport() {
+            const dialog = document.getElementById('reportGradeDialog');
+            if (!dialog.open) return;
+            // iPad 键盘缩小的是 visual viewport，dvh 和布局视口可能仍保持整屏高度。
+            const viewport = window.visualViewport;
+            const height = viewport?.height ?? window.innerHeight;
+            const top = viewport?.offsetTop ?? 0;
+            dialog.style.maxHeight = `${Math.max(0, Math.min(height * 0.9, height - 24))}px`;
+            dialog.style.bottom = 'auto';
+            dialog.style.margin = '0 auto';
+            dialog.style.top = `${top + Math.max(12, (height - dialog.getBoundingClientRect().height) / 2)}px`;
+
+            const input = document.activeElement;
+            if (!input?.matches('#reportGradeDialog input')) return;
+            const rect = input.getBoundingClientRect();
+            const visibleTop = dialog.getBoundingClientRect().top + 12;
+            const visibleBottom = dialog.querySelector('.grade-done').getBoundingClientRect().top - 12;
+            // 只滚动弹窗，避免 Safari 将整个页面推到键盘后方；为底部完成按钮留出空间。
+            if (rect.bottom > visibleBottom) dialog.scrollTop += rect.bottom - visibleBottom;
+            else if (rect.top < visibleTop) dialog.scrollTop -= visibleTop - rect.top;
+        }
+
+        function scheduleReportGradingViewport() {
+            if (reportGradingViewportFrame !== null || !document.getElementById('reportGradeDialog').open) return;
+            reportGradingViewportFrame = requestAnimationFrame(() => {
+                reportGradingViewportFrame = null;
+                updateReportGradingViewport();
+            });
+        }
+
+        window.visualViewport?.addEventListener('resize', scheduleReportGradingViewport);
+        window.visualViewport?.addEventListener('scroll', scheduleReportGradingViewport);
+        window.addEventListener('resize', scheduleReportGradingViewport);
+        document.getElementById('reportGradeDialog').addEventListener('focusin', scheduleReportGradingViewport);
+        document.getElementById('reportGradeDialog').addEventListener('input', scheduleReportGradingViewport);
 
         function closeReportGrading() {
             const dialog = document.getElementById('reportGradeDialog');
             if (!dialog || !dialog.open) return;
             const invalid = dialog.querySelector('[aria-invalid="true"]');
+            if (reportGradingViewportFrame !== null) {
+                cancelAnimationFrame(reportGradingViewportFrame);
+                reportGradingViewportFrame = null;
+            }
             dialog.close();
+            ['max-height', 'bottom', 'margin', 'top'].forEach(property => dialog.style.removeProperty(property));
             document.getElementById('reportGradeBody').replaceChildren();
             if (activeReport?.config.mode === 'set' && document.getElementById('reportScoreSummary')) updateReportGradeDisplay(activeReport);
             if (invalid) showToast('无效输入未保存，其余成绩已保存');
