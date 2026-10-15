@@ -63,7 +63,11 @@ async function main() {
                         return range.getBoundingClientRect().top;
                     });
                     return { x: base.x, width: base.width, height: base.height,
+                        radius: parseFloat(getComputedStyle(card).borderRadius),
                         date: rect(card.querySelector('.history-item-date')),
+                        header: rect(card.querySelector('.history-item-header')),
+                        score: rect(card.querySelector('.history-score')),
+                        scoreRadius: parseFloat(getComputedStyle(card.querySelector('.history-score')).borderRadius),
                         metrics: [...card.querySelectorAll('.history-metric')].map(metric => ({
                             label: rect(metric.querySelector('dt')), value: rect(metric.querySelector('dd'))
                         })),
@@ -76,15 +80,24 @@ async function main() {
                 const reference = cards[0];
                 for (const card of cards) {
                     for (const property of ['x', 'width', 'height']) assert.ok(Math.abs(card[property] - reference[property]) <= 1, `${theme} ${width}px: card ${property}`);
-                    assert.ok(card.height <= (width >= 900 ? 80 : 112), `${width}px: compact row height ${card.height}`);
+                    assert.ok(card.height <= 100, `${width}px: compact row height ${card.height}`);
+                    assert.equal(card.radius, 12);
+                    assert.equal(card.scoreRadius, 8);
                     assert.equal(card.date.x, reference.date.x);
                     assert.equal(card.date.y, reference.date.y);
                     assert.deepEqual(card.metrics, reference.metrics);
+                    assert.deepEqual(card.score, reference.score);
+                    assert.equal(card.metrics.length, 3);
+                    assert.equal(card.metrics[0].label.y, card.metrics[1].label.y);
+                    assert.equal(card.metrics[1].label.y, card.metrics[2].label.y);
+                    assert.equal(card.metrics[0].value.y, card.metrics[2].value.y);
+                    assert.ok(card.score.x >= card.header.x + card.header.width);
+                    assert.ok(card.score.y < card.metrics[0].label.y);
                     assert.deepEqual(card.footer, reference.footer);
                     assert.deepEqual(card.button, reference.button);
                     assert.equal(card.sameLine, true);
                     assert.equal(card.overflow, false);
-                    assert.ok(card.button.x + card.button.width <= card.width - 14);
+                    assert.ok(card.button.x + card.button.width <= card.width - 12);
                 }
                 assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
                 if (process.env.CLOCKCLOCK_LAYOUT_DIR && [390, 820].includes(width)) {
@@ -92,15 +105,15 @@ async function main() {
                     await page.screenshot({ path: path.join(process.env.CLOCKCLOCK_LAYOUT_DIR, `history-${theme}-${width}.png`) });
                 }
             }
-            console.log(`PASS: ${theme}, 320–1280px, compact aligned list rows, single-line actions and no text overflow`);
+            console.log(`PASS: ${theme}, 320–1280px, rounded compact rows, three metrics on one line, upper-right score box and no text overflow`);
         }
         const reportCards = page.locator('.history-item:not(.history-item-unfinished)');
-        assert.match(await reportCards.nth(0).innerText(), /估分\s+80.00\/100.00/);
+        assert.match(await reportCards.nth(0).innerText(), /估分\s+80.00\s*\/100.00/);
         assert.match(await reportCards.nth(1).innerText(), /正确率\s+未录入/);
         assert.match(await reportCards.nth(2).innerText(), /估分\s+待完成录入/);
         assert.match(await reportCards.nth(3).innerText(), /估分\s+—/);
         assert.match(await reportCards.nth(5).innerText(), /正确率\s+0.0%/);
-        assert.match(await reportCards.nth(5).innerText(), /估分\s+0.00\/100.00/);
+        assert.match(await reportCards.nth(5).innerText(), /估分\s+0.00\s*\/100.00/);
 
         await page.setViewportSize({ width: 390, height: 600 });
         for (const selector of ['.report-back', '.report-actions .report-return']) {
@@ -130,7 +143,7 @@ async function main() {
         for (const input of await page.locator('.section-accuracy').all()) await input.fill('100');
         await page.getByRole('button', { name: '完成并返回报告' }).click();
         await page.locator('.report-back').click();
-        assert.match(await reportCards.first().innerText(), /估分\s+100.00\/100.00/);
+        assert.match(await reportCards.first().innerText(), /估分\s+100.00\s*\/100.00/);
         await reportCards.first().locator('.history-delete').click();
         assert.equal(await reportCards.count(), 5);
         assert.equal(await page.locator('#page-history').evaluate(el => el.classList.contains('active')), true);
