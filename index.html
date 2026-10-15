@@ -1362,55 +1362,91 @@
             border-color: var(--border);
         }
         .history-item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            align-items: start;
+            gap: 12px;
+            min-height: 44px;
+            margin-bottom: 16px;
         }
         .history-item-date {
-            font-size: 14px;
+            font-size: 12px;
+            line-height: 20px;
+            padding: 2px 0;
+            white-space: nowrap;
             font-weight: 500;
             color: var(--text-primary);
         }
+        .history-item-badges {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            align-items: start;
+            gap: 6px;
+            min-width: 0;
+        }
         .history-item-mode {
             font-size: 11px;
-            padding: 2px 10px;
+            line-height: 16px;
+            padding: 4px 8px;
+            max-width: 100%;
+            overflow-wrap: anywhere;
             border-radius: 10px;
             background: var(--accent-glow);
             color: var(--accent-text);
             font-weight: 500;
         }
         .history-item-stats {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 16px;
-            font-size: 12px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px 12px;
+            margin: 0;
+        }
+        .history-metric { min-width: 0; }
+        .history-metric dt {
+            margin-bottom: 4px;
+            font-size: 11px;
+            line-height: 16px;
             color: var(--text-muted);
+        }
+        .history-metric dd {
+            font-size: 12px;
+            line-height: 20px;
+            min-height: 20px;
+            color: var(--text-primary);
             font-family: "JetBrains Mono", monospace;
+            font-variant-numeric: tabular-nums;
+            overflow-wrap: anywhere;
         }
+        .history-metric .history-metric-empty { color: var(--text-muted); font-family: inherit; }
+        .history-metric .history-metric-accuracy { color: var(--green); }
         .history-item-unfinished {
-            border-left: 3px solid var(--amber);
+            border-left-color: var(--amber);
+            box-shadow: inset 2px 0 var(--amber), var(--shadow-card);
         }
-        .history-mode-unfinished {
-            background: rgba(201,143,75,0.15);
-            color: var(--amber);
-        }
-        .history-item-stats span {
+        .history-item-footer {
             display: flex;
             align-items: center;
-            gap: 4px;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-light);
         }
+        .history-item-hint { min-width: 0; font-size: 11px; line-height: 18px; color: var(--text-muted); }
         .history-delete {
             margin-left: auto;
             flex-shrink: 0;
             white-space: nowrap;
-            padding: 4px 12px;
+            min-width: 56px;
+            min-height: 36px;
+            padding: 8px 12px;
             border: 1px solid var(--red-dim);
             background: transparent;
             color: var(--red);
             border-radius: 6px;
             font-size: 11px;
+            line-height: 18px;
             font-weight: 500;
             cursor: pointer;
             font-family: inherit;
@@ -3587,12 +3623,16 @@
                     <div class="history-item history-item-unfinished" onclick="resumeFromHistory()">
                         <div class="history-item-header">
                             <span class="history-item-date">进行中</span>
-                            <span class="history-item-mode">${modeText}</span>
-                            <span class="history-item-mode history-mode-unfinished">未完成</span>
+                            <div class="history-item-badges"><span class="history-item-mode">${escapeReportText(modeText)}</span></div>
                         </div>
-                        <div class="history-item-stats">
-                            <span>${answered}/${total} 题</span>
-                            <span>第 ${p.currentQuestion} 题</span>
+                        <dl class="history-item-stats">
+                            <div class="history-metric"><dt>答题进度</dt><dd>${answered}/${total} 题</dd></div>
+                            <div class="history-metric"><dt>当前题号</dt><dd>第 ${p.currentQuestion} 题</dd></div>
+                            <div class="history-metric"><dt>正确率</dt><dd class="history-metric-empty">待交卷</dd></div>
+                            <div class="history-metric"><dt>参考估分</dt><dd class="history-metric-empty">待交卷</dd></div>
+                        </dl>
+                        <div class="history-item-footer">
+                            <span class="history-item-hint">未完成 · 点击继续答题</span>
                             <button class="history-delete" onclick="event.stopPropagation();discardUnfinished()">放弃</button>
                         </div>
                     </div>
@@ -3610,20 +3650,23 @@
                 });
                 const modeText = escapeReportText(getReportName(r.config));
                 const accuracyInfo = getReportAccuracyInfo(r);
-                const accuracyText = accuracyInfo ? `正确率 ${accuracyInfo.denominator ? (accuracyInfo.correct / accuracyInfo.denominator * 100).toFixed(1) : '0.0'}%` : '';
+                const accuracyText = accuracyInfo ? `${accuracyInfo.denominator ? (accuracyInfo.correct / accuracyInfo.denominator * 100).toFixed(1) : '0.0'}%` : '';
                 const score = r.config.mode === 'set' && r.grading ? getReportScore(r) : null;
-                const scoreText = score?.complete ? `估分 ${score.knownScore.toFixed(2)}/${score.fullScore.toFixed(2)}` : '';
+                const scoreText = score?.complete ? `${score.knownScore.toFixed(2)}/${score.fullScore.toFixed(2)}` : '';
                 html += `
                     <div class="history-item" onclick="viewReportByIndex(${idx})">
                         <div class="history-item-header">
                             <span class="history-item-date">${date}</span>
-                            <span class="history-item-mode">${modeText}</span>
+                            <div class="history-item-badges"><span class="history-item-mode">${modeText}</span></div>
                         </div>
-                        <div class="history-item-stats">
-                            <span>${answered}/${total} 题</span>
-                            ${accuracyText ? `<span style="color:var(--green)">${accuracyText}</span>` : ''}
-                            ${scoreText ? `<span>${scoreText}</span>` : ''}
-                            <span>用时 ${formatTime(r.totalTime || 0)}</span>
+                        <dl class="history-item-stats">
+                            <div class="history-metric"><dt>答题进度</dt><dd>${answered}/${total} 题</dd></div>
+                            <div class="history-metric"><dt>用时</dt><dd>${formatTime(r.totalTime || 0)}</dd></div>
+                            <div class="history-metric"><dt>正确率</dt><dd class="${accuracyText ? 'history-metric-accuracy' : 'history-metric-empty'}">${accuracyText || '未录入'}</dd></div>
+                            <div class="history-metric"><dt>参考估分</dt><dd class="${scoreText ? '' : 'history-metric-empty'}">${scoreText || (r.config.mode !== 'set' ? '—' : score?.entered ? '待完成录入' : '未录入')}</dd></div>
+                        </dl>
+                        <div class="history-item-footer">
+                            <span class="history-item-hint">点击查看报告</span>
                             <button class="history-delete" onclick="event.stopPropagation();deleteReport(${idx})">删除</button>
                         </div>
                     </div>

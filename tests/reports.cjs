@@ -139,7 +139,7 @@ async function main() {
         });
         assert.match(await page.locator('#statsContent').innerText(), /50.0%/);
         await page.evaluate(() => showHistory());
-        assert.match(await page.locator('#historyList').innerText(), /估分 52.00\/104.00/);
+        assert.match(await page.locator('#historyList').innerText(), /参考估分\s+52.00\/104.00/);
         console.log('PASS: history scores and accuracy excludes reports without grading');
 
         await makeReport('guangdong', { empty: true });
