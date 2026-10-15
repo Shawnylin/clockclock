@@ -76,13 +76,15 @@ async function main() {
                 const reference = cards[0];
                 for (const card of cards) {
                     for (const property of ['x', 'width', 'height']) assert.ok(Math.abs(card[property] - reference[property]) <= 1, `${theme} ${width}px: card ${property}`);
-                    assert.deepEqual(card.date, reference.date);
+                    assert.ok(card.height <= (width >= 900 ? 80 : 112), `${width}px: compact row height ${card.height}`);
+                    assert.equal(card.date.x, reference.date.x);
+                    assert.equal(card.date.y, reference.date.y);
                     assert.deepEqual(card.metrics, reference.metrics);
                     assert.deepEqual(card.footer, reference.footer);
                     assert.deepEqual(card.button, reference.button);
                     assert.equal(card.sameLine, true);
                     assert.equal(card.overflow, false);
-                    assert.ok(card.button.x + card.button.width <= card.width - 18);
+                    assert.ok(card.button.x + card.button.width <= card.width - 14);
                 }
                 assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
                 if (process.env.CLOCKCLOCK_LAYOUT_DIR && [390, 820].includes(width)) {
@@ -90,23 +92,45 @@ async function main() {
                     await page.screenshot({ path: path.join(process.env.CLOCKCLOCK_LAYOUT_DIR, `history-${theme}-${width}.png`) });
                 }
             }
-            console.log(`PASS: ${theme}, 320–1280px, equal card widths/heights, aligned labels/values/footers/buttons and no text overflow`);
+            console.log(`PASS: ${theme}, 320–1280px, compact aligned list rows, single-line actions and no text overflow`);
         }
         const reportCards = page.locator('.history-item:not(.history-item-unfinished)');
-        assert.match(await reportCards.nth(0).innerText(), /参考估分\s+80.00\/100.00/);
+        assert.match(await reportCards.nth(0).innerText(), /估分\s+80.00\/100.00/);
         assert.match(await reportCards.nth(1).innerText(), /正确率\s+未录入/);
-        assert.match(await reportCards.nth(2).innerText(), /参考估分\s+待完成录入/);
-        assert.match(await reportCards.nth(3).innerText(), /参考估分\s+—/);
+        assert.match(await reportCards.nth(2).innerText(), /估分\s+待完成录入/);
+        assert.match(await reportCards.nth(3).innerText(), /估分\s+—/);
         assert.match(await reportCards.nth(5).innerText(), /正确率\s+0.0%/);
-        assert.match(await reportCards.nth(5).innerText(), /参考估分\s+0.00\/100.00/);
+        assert.match(await reportCards.nth(5).innerText(), /估分\s+0.00\/100.00/);
 
+        await page.setViewportSize({ width: 390, height: 600 });
+        for (const selector of ['.report-back', '.report-actions .report-return']) {
+            await reportCards.nth(3).evaluate(el => el.scrollIntoView({ block: 'center' }));
+            const scrollTop = await page.locator('#page-history').evaluate(el => el.scrollTop);
+            assert.ok(scrollTop > 0);
+            await reportCards.nth(3).click();
+            assert.match(await page.locator(selector).innerText(), /返回历史记录/);
+            // Rerendering the current report must preserve its original entry point.
+            await page.evaluate(() => showReport(activeReport));
+            await page.locator(selector).click();
+            assert.equal(await page.locator('#page-history').evaluate(el => el.classList.contains('active')), true);
+            assert.equal(await page.locator('#page-history').evaluate(el => el.scrollTop), scrollTop);
+            assert.equal(await page.locator('.tab-item.active').getAttribute('data-tab'), 'page-history');
+        }
+        for (const [origin, label] of [['page-home', '返回首页'], ['page-stats', '返回统计'], ['page-settings', '返回设置']]) {
+            await page.evaluate(origin => { switchTab(origin); showReport(appState.reports[0]); }, origin);
+            assert.match(await page.locator('.report-back').innerText(), new RegExp(label));
+            await page.locator('.report-back').click();
+            assert.equal(await page.locator(`#${origin}`).evaluate(el => el.classList.contains('active')), true);
+            assert.equal(await page.locator('.tab-item.active').getAttribute('data-tab'), origin);
+        }
+        await page.evaluate(() => showHistory());
         await reportCards.first().click();
         assert.equal(await page.locator('#page-report').evaluate(el => el.classList.contains('active')), true);
         await page.locator('#btnEditReportGrade').click();
         for (const input of await page.locator('.section-accuracy').all()) await input.fill('100');
         await page.getByRole('button', { name: '完成并返回报告' }).click();
-        await page.evaluate(() => showHistory());
-        assert.match(await reportCards.first().innerText(), /参考估分\s+100.00\/100.00/);
+        await page.locator('.report-back').click();
+        assert.match(await reportCards.first().innerText(), /估分\s+100.00\/100.00/);
         await reportCards.first().locator('.history-delete').click();
         assert.equal(await reportCards.count(), 5);
         assert.equal(await page.locator('#page-history').evaluate(el => el.classList.contains('active')), true);
@@ -121,10 +145,25 @@ async function main() {
         await page.locator('.history-item-unfinished .history-delete').click();
         assert.equal(await page.evaluate(() => appState.progress), null);
         assert.equal(await reportCards.count(), 5);
+        await page.evaluate(() => goHome());
+        await page.locator('#btnStart').click();
+        await page.evaluate(() => { showSubmitPage(); confirmSubmit(); });
+        assert.match(await page.locator('.report-back').innerText(), /返回首页/);
+        await page.locator('.report-back').click();
+        assert.equal(await page.locator('#page-home').evaluate(el => el.classList.contains('active')), true);
+        await page.locator('#btnStart').click();
+        await page.evaluate(() => { pauseExam(); showHistory(); });
+        await page.locator('.history-item-unfinished').click();
+        await page.evaluate(() => { showSubmitPage(); confirmSubmit(); });
+        assert.match(await page.locator('.report-back').innerText(), /返回历史记录/);
+        await page.locator('.report-actions .report-return').click();
+        assert.equal(await page.locator('#page-history').evaluate(el => el.classList.contains('active')), true);
+        assert.equal(await page.evaluate(() => appState.progress), null);
         await page.evaluate(() => { appState.reports = []; showHistory(); });
         assert.equal(await page.locator('.history-empty').innerText(), '暂无历史记录');
         assert.deepEqual(errors, []);
         console.log('PASS: grade states, report entry/edit, delete isolation/persistence, resume/discard and empty history');
+        console.log('PASS: both report back buttons, preserved list scroll/tab, rerenders, workspace origins and submission return paths');
     } finally {
         if (browser) await browser.close();
         await new Promise(resolve => server.close(resolve));

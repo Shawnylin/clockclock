@@ -1202,7 +1202,7 @@
             align-items: center;
             gap: 12px;
             width: 100%;
-            max-width: 500px;
+            max-width: 1000px;
             margin-bottom: 20px;
         }
         .history-header h3 {
@@ -1340,7 +1340,7 @@
             padding: 60px 20px;
         }
 
-        .history-list { width: 100%; max-width: 500px; }
+        .history-list { width: 100%; max-width: 1000px; }
         .history-empty {
             text-align: center;
             color: var(--text-muted);
@@ -1348,71 +1348,69 @@
             font-size: 14px;
         }
         .history-item {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 48px;
+            gap: 6px 12px;
             background: var(--bg-card);
-            border-radius: 12px;
-            padding: 16px 18px;
-            margin-bottom: 10px;
-            box-shadow: var(--shadow-card);
-            border: 1px solid var(--border-light);
+            padding: 12px 14px;
+            border-top: 1px solid transparent;
+            border-bottom: 1px solid var(--border-light);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background 0.15s;
         }
+        .history-item:first-child { border-top-color: var(--border-light); }
         .history-item:active {
-            transform: scale(0.985);
-            border-color: var(--border);
+            background: var(--bg-muted);
         }
         .history-item-header {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            align-items: start;
-            gap: 12px;
-            min-height: 44px;
-            margin-bottom: 16px;
+            grid-column: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            min-height: 36px;
+            min-width: 0;
         }
         .history-item-date {
-            font-size: 12px;
-            line-height: 20px;
-            padding: 2px 0;
+            order: 1;
+            font-size: 11px;
+            line-height: 18px;
             white-space: nowrap;
             font-weight: 500;
-            color: var(--text-primary);
+            color: var(--text-muted);
         }
         .history-item-badges {
             display: flex;
             flex-wrap: wrap;
-            justify-content: flex-end;
+            justify-content: flex-start;
             align-items: start;
             gap: 6px;
             min-width: 0;
         }
         .history-item-mode {
-            font-size: 11px;
-            line-height: 16px;
-            padding: 4px 8px;
+            font-size: 12px;
+            line-height: 18px;
             max-width: 100%;
             overflow-wrap: anywhere;
-            border-radius: 10px;
-            background: var(--accent-glow);
-            color: var(--accent-text);
+            color: var(--text-primary);
             font-weight: 500;
         }
         .history-item-stats {
+            grid-column: 1 / -1;
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 16px 12px;
+            gap: 4px 12px;
             margin: 0;
         }
-        .history-metric { min-width: 0; }
+        .history-metric { min-width: 0; display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 4px; align-items: center; }
         .history-metric dt {
-            margin-bottom: 4px;
-            font-size: 11px;
-            line-height: 16px;
+            font-size: 10px;
+            line-height: 18px;
             color: var(--text-muted);
         }
         .history-metric dd {
-            font-size: 12px;
-            line-height: 20px;
-            min-height: 20px;
+            font-size: 11px;
+            line-height: 18px;
+            min-height: 18px;
             color: var(--text-primary);
             font-family: "JetBrains Mono", monospace;
             font-variant-numeric: tabular-nums;
@@ -1421,26 +1419,22 @@
         .history-metric .history-metric-empty { color: var(--text-muted); font-family: inherit; }
         .history-metric .history-metric-accuracy { color: var(--green); }
         .history-item-unfinished {
-            border-left-color: var(--amber);
-            box-shadow: inset 2px 0 var(--amber), var(--shadow-card);
+            box-shadow: inset 2px 0 var(--amber);
         }
         .history-item-footer {
+            grid-column: 2;
+            grid-row: 1;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin-top: 16px;
-            padding-top: 12px;
-            border-top: 1px solid var(--border-light);
+            justify-content: flex-end;
         }
-        .history-item-hint { min-width: 0; font-size: 11px; line-height: 18px; color: var(--text-muted); }
         .history-delete {
             margin-left: auto;
             flex-shrink: 0;
             white-space: nowrap;
-            min-width: 56px;
-            min-height: 36px;
-            padding: 8px 12px;
+            min-width: 48px;
+            min-height: 32px;
+            padding: 6px 10px;
             border: 1px solid var(--red-dim);
             background: transparent;
             color: var(--red);
@@ -1454,6 +1448,13 @@
         }
         .history-delete:active {
             background: rgba(196,90,90,0.1);
+        }
+        @media (min-width: 900px) {
+            .history-item { grid-template-columns: minmax(180px, 1fr) minmax(0, 2fr) 48px; gap: 16px; align-items: center; }
+            .history-item-header { grid-column: 1; grid-row: 1; flex-direction: column; }
+            .history-item-stats { grid-column: 2; grid-row: 1; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+            .history-metric { display: block; }
+            .history-item-footer { grid-column: 3; grid-row: 1; }
         }
 
         /* ==================== Resume Dialog ==================== */
@@ -1909,11 +1910,11 @@
 
         <!-- ==================== Report Page ==================== -->
         <div id="page-report" class="page">
-            <button class="page-back-btn report-back" onclick="goHome()">&larr; 返回首页</button>
+            <button class="page-back-btn report-back report-return" onclick="returnFromReport()">&larr; 返回上一级</button>
             <div class="report-title">答题报告</div>
             <div id="reportContent"></div>
             <div class="report-actions">
-                <button class="btn-report-home" onclick="goHome()">返回首页</button>
+                <button class="btn-report-home report-return" onclick="returnFromReport()">返回上一级</button>
                 <button class="btn-report-history" onclick="showHistory()">历史记录</button>
             </div>
         </div>
@@ -2184,7 +2185,20 @@
         //  PAGE NAVIGATION
         // ================================================================
 
+        let examReturnContext = { pageId: 'page-home', scrollTop: 0 };
+        let reportReturnContext = { pageId: 'page-home', scrollTop: 0 };
+
+        function getWorkspacePageContext() {
+            const page = document.querySelector('.page.active');
+            return page && ['page-home', 'page-history', 'page-stats', 'page-settings'].includes(page.id)
+                ? { pageId: page.id, scrollTop: page.scrollTop } : null;
+        }
+
         function showPage(pageId) {
+            if (pageId === 'page-exam') {
+                const origin = getWorkspacePageContext();
+                if (origin) examReturnContext = origin;
+            }
             if (pageId !== 'page-report') closeReportGrading();
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
@@ -3480,6 +3494,13 @@
 
         function showReport(report) {
             closeReportGrading();
+            if (!document.getElementById('page-report').classList.contains('active')) {
+                reportReturnContext = getWorkspacePageContext() || { ...examReturnContext };
+            }
+            const returnLabel = { 'page-home': '返回首页', 'page-history': '返回历史记录', 'page-stats': '返回统计', 'page-settings': '返回设置' }[reportReturnContext.pageId];
+            document.querySelectorAll('.report-return').forEach(button => {
+                button.textContent = (button.classList.contains('report-back') ? '← ' : '') + returnLabel;
+            });
             activeReport = report;
             const container = document.getElementById('reportContent');
             const config = report.config;
@@ -3565,6 +3586,17 @@
             showPage('page-report');
         }
 
+        function returnFromReport() {
+            const { pageId, scrollTop } = reportReturnContext;
+            if (pageId === 'page-home') goHome();
+            else if (pageId === 'page-history') showHistory();
+            else {
+                if (pageId === 'page-stats') renderStats();
+                showPage(pageId);
+            }
+            document.getElementById(pageId).scrollTop = scrollTop;
+        }
+
         function onCorrectCountInput(input, maxAnswered, reportId) {
             const val = input.value.trim() === '' ? null : Number(input.value);
             if (val !== null && (!Number.isInteger(val) || val < 0 || val > maxAnswered)) {
@@ -3626,13 +3658,12 @@
                             <div class="history-item-badges"><span class="history-item-mode">${escapeReportText(modeText)}</span></div>
                         </div>
                         <dl class="history-item-stats">
-                            <div class="history-metric"><dt>答题进度</dt><dd>${answered}/${total} 题</dd></div>
-                            <div class="history-metric"><dt>当前题号</dt><dd>第 ${p.currentQuestion} 题</dd></div>
+                            <div class="history-metric"><dt>进度</dt><dd>${answered}/${total} 题</dd></div>
+                            <div class="history-metric"><dt>当前题</dt><dd>第 ${p.currentQuestion} 题</dd></div>
                             <div class="history-metric"><dt>正确率</dt><dd class="history-metric-empty">待交卷</dd></div>
-                            <div class="history-metric"><dt>参考估分</dt><dd class="history-metric-empty">待交卷</dd></div>
+                            <div class="history-metric"><dt>估分</dt><dd class="history-metric-empty">待交卷</dd></div>
                         </dl>
                         <div class="history-item-footer">
-                            <span class="history-item-hint">未完成 · 点击继续答题</span>
                             <button class="history-delete" onclick="event.stopPropagation();discardUnfinished()">放弃</button>
                         </div>
                     </div>
@@ -3660,13 +3691,12 @@
                             <div class="history-item-badges"><span class="history-item-mode">${modeText}</span></div>
                         </div>
                         <dl class="history-item-stats">
-                            <div class="history-metric"><dt>答题进度</dt><dd>${answered}/${total} 题</dd></div>
+                            <div class="history-metric"><dt>进度</dt><dd>${answered}/${total} 题</dd></div>
                             <div class="history-metric"><dt>用时</dt><dd>${formatTime(r.totalTime || 0)}</dd></div>
                             <div class="history-metric"><dt>正确率</dt><dd class="${accuracyText ? 'history-metric-accuracy' : 'history-metric-empty'}">${accuracyText || '未录入'}</dd></div>
-                            <div class="history-metric"><dt>参考估分</dt><dd class="${scoreText ? '' : 'history-metric-empty'}">${scoreText || (r.config.mode !== 'set' ? '—' : score?.entered ? '待完成录入' : '未录入')}</dd></div>
+                            <div class="history-metric"><dt>估分</dt><dd class="${scoreText ? '' : 'history-metric-empty'}">${scoreText || (r.config.mode !== 'set' ? '—' : score?.entered ? '待完成录入' : '未录入')}</dd></div>
                         </dl>
                         <div class="history-item-footer">
-                            <span class="history-item-hint">点击查看报告</span>
                             <button class="history-delete" onclick="event.stopPropagation();deleteReport(${idx})">删除</button>
                         </div>
                     </div>
